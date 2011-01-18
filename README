@@ -1,0 +1,35 @@
+
+This material is based on research sponsored by DARPA under agreement
+number FA8750-10-2-0165. The U.S. Government is authorized to
+reproduce and distribute reprints for Governmental purposes
+notwithstanding any copyright notation thereon.
+
+The views and conclusions contained herein are those of the authors
+and should not be interpreted as necessarily representing the official
+policies or endorsements, either expressed or implied, of DARPA or the
+U.S. Government.
+
+Some restrictions apply for use by entities other than the
+U.S. Government. Please see the LICENSE file for more details.
+
+=========================================================================
+
+This repository contains the general purpose files for use in the
+modeling of the network and mission space models. These files are used
+for a variety of purposes and are put in a number of different
+directories.
+
+Directory:
+
+communications : directory that contains files used for handling the
+	         communication between different processes that are
+	         part of the larger simulation.
+
+communications/c++ : c++ files that are used to facilitate the
+                     communications. (This needs to change but will do
+                     for now. We should divide this up into other
+                     subdirectories once we figure out the different
+                     functionalities that we will need to implement.)
+
+
+
