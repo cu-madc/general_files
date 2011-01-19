@@ -225,7 +225,7 @@ int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,const char *
 	for (sibling = currentNode; sibling; sibling = sibling->next) {
 		content = xmlNodeGetContent(sibling);
 		if ((strcmp((char *) sibling->name, name) == 0) &&
-			(strcomp((char *)content,contents))){
+			(strcmp((char *)content,contents)==0)){
 			// The name of the node matches the name that was passed.
 			// Return this node.
 			return (1);
