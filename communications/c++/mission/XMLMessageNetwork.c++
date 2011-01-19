@@ -106,9 +106,9 @@ void XMLMessageNetwork::createDimensions() {
 
 	xmlNodePtr node;
 	node = xmlNewChild(root_node, NULL, BAD_CAST "objects",NULL);
-	node = xmlNewChild(node,NULL,BAD_CAST "objectClass",NULL);
-	xmlNewChild(node,NULL,BAD_CAST "name",BAD_CAST "vacummNetwork");
-	dimensionsNode = xmlNewChild(node, NULL, BAD_CAST "dimensions",NULL);
+	objectClassNode = xmlNewChild(node,NULL,BAD_CAST "objectClass",NULL);
+	xmlNewChild(objectClassNode,NULL,BAD_CAST "name",BAD_CAST "vacummNetwork");
+	dimensionsNode = xmlNewChild(objectClassNode, NULL, BAD_CAST "dimensions",NULL);
 
 }
 
@@ -118,12 +118,12 @@ void XMLMessageNetwork::setNetworkIDNode() {
 	 * which vacumm this structure is associated with. The value is then
 	 * added to the xml tree under the dimensions node.
 	 **/
-	xmlNodePtr node;
+
 	char numberRef[8];
-	node = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
+	networkIDNode = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
 	sprintf(numberRef, "%d", networkID);
-	xmlNewChild(node, NULL, BAD_CAST "name",BAD_CAST "networkID");
-	xmlNewChild(node, NULL, BAD_CAST "value",BAD_CAST numberRef);
+	xmlNewChild(networkIDNode, NULL, BAD_CAST "name",BAD_CAST "networkID");
+	xmlNewChild(networkIDNode, NULL, BAD_CAST "value",BAD_CAST numberRef);
 
 }
 
@@ -136,12 +136,26 @@ void XMLMessageNetwork::setProbSuccessNode() {
 	 * under the dimensions node.
 	 **/
 
-	xmlNodePtr node;
 	char numberRef[21];
-	node = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
+	probSuccessNode = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
 	sprintf(numberRef, "%22.14E", probSuccessfulTransmission);
-	xmlNewChild(node, NULL, BAD_CAST "name",BAD_CAST "probabilitySuccessfulTransmission");
-	xmlNewChild(node, NULL, BAD_CAST "value",BAD_CAST numberRef);
+	xmlNewChild(probSuccessNode, NULL, BAD_CAST "name",BAD_CAST "probabilitySuccessfulTransmission");
+	xmlNewChild(probSuccessNode, NULL, BAD_CAST "value",BAD_CAST numberRef);
+
+}
+
+
+void XMLMessageNetwork::copyXMLTree(xmlDocPtr existingDocument){
+	/**
+	 * Copy the given parsed XML tree into the local tree. Also set the
+	 * relevant nodes that this class tracks from the tree.
+	 **/
+
+	XMLParser::copyXMLTree(existingDocument);
+
+	if(root_node) {
+
+	}
 
 }
 
