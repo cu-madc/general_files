@@ -198,7 +198,7 @@ xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,const 
 			}
 		}
 
-		// Check to see if the target is any of this object's children.
+		// Check to see if the target is any of this node's children.
 		checkChildren = walkObjectChildrenByNameContents(sibling->children,name,contents);
 		if(checkChildren) {
 			// A match was found. Return it.
@@ -225,7 +225,7 @@ int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,const char *
 	for (sibling = currentNode; sibling; sibling = sibling->next) {
 		content = xmlNodeGetContent(sibling);
 		if ((strcmp((char *) sibling->name, name) == 0) &&
-			(strcmp((char *)content,contents)==0)){
+			(strcmp((char *)content,contents) == 0)){
 			// The name of the node matches the name that was passed.
 			// Return this node.
 			return (1);
