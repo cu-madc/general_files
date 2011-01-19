@@ -175,6 +175,68 @@ void XMLParser::copyXMLTree(xmlDocPtr existingDocument){
 
 }
 
+xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,const char *name,const char *contents){
+	/**
+	 * Routine to walk through the tree and find the node that contains a child with the given name
+	 * and associated contents.
+	 **/
+
+	xmlNode *sibling;       // siblings of current node
+	xmlNode *checkChildren; // result from checking children of each sibling
+
+	if(currentNode==NULL) {
+		return(NULL); // The node passed in was null.
+	}
+
+	for(sibling=currentNode;sibling;sibling=sibling->next){
+		// Go through each of the children of the passed node.
+
+		if(sibling->type == XML_ELEMENT_NODE) {
+			// This node is an element.
+			if(checkChildrenForNameAndContents(sibling->children,name,contents)) {
+				return(sibling);
+			}
+		}
+
+		// Check to see if the target is any of this object's children.
+		checkChildren = walkObjectChildrenByNameContents(sibling->children,name,contents);
+		if(checkChildren) {
+			// A match was found. Return it.
+			return(checkChildren);
+		}
+
+	}
+
+	// No match was found. Return null.
+	return(NULL);
+
+}
+
+int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,const char *name,const char *contentsToMatch){
+	/*
+	 * Routine to walk through each of the children of the current node. If it has a
+	 * node with the given name and whose contents match the given value then the
+	 * result is "true." Otherwise return "false."
+	 */
+
+	xmlNode *sibling;       // siblings of current node
+	xmlChar *content;       // content of a node
+
+	for (sibling = currentNode; sibling; sibling = sibling->next) {
+		content = xmlNodeGetContent(sibling);
+		if ((strcmp((char *) sibling->name, name) == 0) &&
+			(strcomp((char *)content,contents))){
+			// The name of the node matches the name that was passed.
+			// Return this node.
+			return (1);
+		}
+	}
+
+	return(0);
+
+}
+
+
 void XMLParser::xml2Char() {
 	/**
 	 * Convert the parsed XML file in the local root and then
@@ -217,6 +279,10 @@ void XMLParser::cleanUpXML() {
 	xmlMemoryDump();
 
 }
+
+
+
+
 
 
 
