@@ -107,7 +107,7 @@ void XMLMessageNetwork::createDimensions() {
 	xmlNodePtr node;
 	node = xmlNewChild(root_node, NULL, BAD_CAST "objects",NULL);
 	objectClassNode = xmlNewChild(node,NULL,BAD_CAST "objectClass",NULL);
-	xmlNewChild(objectClassNode,NULL,BAD_CAST "name",BAD_CAST "vacummNetwork");
+	xmlNewChild(objectClassNode,NULL,BAD_CAST "name",BAD_CAST "vacuumNetwork");
 	dimensionsNode = xmlNewChild(objectClassNode, NULL, BAD_CAST "dimensions",NULL);
 
 }

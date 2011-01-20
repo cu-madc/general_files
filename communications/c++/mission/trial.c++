@@ -64,9 +64,8 @@
 	 name[0] = 0;
 
 	XMLMessageNetwork *trial = new XMLMessageNetwork;
-	XMLIncomingDIF    *message = new XMLIncomingDIF;
+	XMLMessageNetwork *message = new XMLMessageNetwork;
 
-	/*
 	trial->setNetworkID(2);
 	trial->setProbSuccessfulTransmission(0.5);
 	trial->createRootNode();
@@ -74,16 +73,24 @@
 	trial->setNetworkIDNode();
 	trial->setProbSuccessNode();
 	trial->xml2Char();
-	*/
 
-	message->readXMLFile("networkSample.xml");
-	message->parseXMLBuffer();
-	message->getObjectClassName(name,100);
-	std::cout << "name: " << name << std::endl << std::endl;
 
-	trial->copyXMLTree(message->getXMLDocument());
-	trial->xml2Char();
-	std::cout << message->getBuffer() << std::endl << std::endl;
+	message->copyXMLTree(trial->getXMLDocument());
+	xmlNode* node = message->walkObjectChildrenByNameContents(message->getRootNode(),"name","vacuumNetwork");
+
+	if (node) {
+		std::cout << "Found it: " << (void *)node << std::endl;
+		for (node = node->children; node; node = node->next) {
+			if (node->type == XML_ELEMENT_NODE) {
+				//char *contents = (char *) xmlNodeGetContent(node);
+				//if (contents) {
+				//	std::cout << "Content: " << contents << std::endl;
+				//}
+			}
+		}
+	}
+
+	//std::cout << node->name << std::endl << std::endl;
 
 	delete message;
 	return(0);

@@ -8,7 +8,7 @@ MEX=mex
 
 CFLAGS= -O3 `xml2-config --cflags` -fPIC
 MEXFLAGS=-cxx 
-# CFLAGS=  -g
+# CFLAGS=  -g -O3
 LIB=  -lm  -lpthread `xml2-config --libs`
 LDLIB = 
 INCLUDE = -I/usr/local/MATLAB/R2010b/extern/include -I/usr/include/octave-3.2.4/octave/

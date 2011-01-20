@@ -90,6 +90,8 @@ public:
 	void parseXMLBuffer();           // Parses the xml file in the current buffer.
 	void cleanUpXML();               // cleans up the data associated with the parsed xml tree
 
+	xmlNode* getRootNode() { return root_node;};
+
 
 protected:
 	// xml parser and tree variables
