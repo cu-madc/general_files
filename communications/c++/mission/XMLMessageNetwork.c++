@@ -136,7 +136,7 @@ void XMLMessageNetwork::setProbSuccessNode() {
 	 * under the dimensions node.
 	 **/
 
-	char numberRef[21];
+	char numberRef[23];
 	probSuccessNode = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
 	sprintf(numberRef, "%22.14E", probSuccessfulTransmission);
 	xmlNewChild(probSuccessNode, NULL, BAD_CAST "name",BAD_CAST "probabilitySuccessfulTransmission");
