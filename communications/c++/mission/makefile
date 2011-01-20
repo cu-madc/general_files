@@ -15,9 +15,9 @@ INCLUDE = -I/usr/local/MATLAB/R2010b/extern/include -I/usr/include/octave-3.2.4/
 OFLAGS = 
 
 
-LDEP = PollingServer.c++ XMLParser.c++ XMLMessageNetwork.c++ XMLIncomingDIF.c++
-HDEP = PollingServer.h   XMLParser.h   XMLMessageNetwork.h   XMLIncomingDIF.h
-LOCAL = PollingServer.o  XMLParser.o   XMLMessageNetwork.o   XMLIncomingDIF.o
+LDEP = PollingServer.c++ XMLParser.c++ XMLMessageNetwork.c++ XMLIncomingDIF.c++ Sender.c++
+HDEP = PollingServer.h   XMLParser.h   XMLMessageNetwork.h   XMLIncomingDIF.h   Sender.h
+LOCAL = PollingServer.o  XMLParser.o   XMLMessageNetwork.o   XMLIncomingDIF.o   Sender.o
 DEP = 
 
 
