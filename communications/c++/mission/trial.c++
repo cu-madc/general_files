@@ -58,43 +58,52 @@
 #include <iostream>
 #include "XMLMessageNetwork.h"
 #include "XMLIncomingDIF.h"
+#include "PollingServer.h"
+#include "Sender.h"
 
- int main(int argc,char **argv) {
-	 char name[100];
-	 name[0] = 0;
+int main(int argc, char **argv) {
+	char name[100];
+	name[0] = 0;
 
-	XMLMessageNetwork *trial = new XMLMessageNetwork;
-	XMLMessageNetwork *message = new XMLMessageNetwork;
-
-	trial->setNetworkID(2);
-	trial->setProbSuccessfulTransmission(0.5);
-	trial->createRootNode();
-	trial->createDimensions();
-	trial->setNetworkIDNode();
-	trial->setProbSuccessNode();
-	trial->xml2Char();
-
-
-	message->copyXMLTree(trial->getXMLDocument());
-	xmlNode* node = message->walkObjectChildrenByNameContents(message->getRootNode(),"dimension","name","probabilitySuccessfulTransmission");
-
-	if (node) {
-		std::cout << "Found it: " << (void *)node << std::endl;
-		for (node = node->children; node; node = node->next) {
-			if (node->type == XML_ELEMENT_NODE) {
-				char *contents = (char *) xmlNodeGetContent(node);
-				if (contents) {
-					std::cout << "Content: " << contents << std::endl;
-				}
-			}
-		}
+	if (argc < 2) {
+		std::cout << "usage: " << argv[0] << " server|client" << std::endl;
+		return (1);
 	}
 
-	//std::cout << node->name << std::endl << std::endl;
+	if (strcmp(argv[1], "server") == 0) {
+		PollingServer *server = new PollingServer(0);
 
-	delete message;
-	return(0);
+	}
 
- }
+	else if (strcmp(argv[1], "client") == 0) {
+		XMLMessageNetwork *trial = new XMLMessageNetwork;
+		XMLMessageNetwork *message = new XMLMessageNetwork;
 
+		trial->setNetworkID(2);
+		trial->setProbSuccessfulTransmission(0.5);
+		trial->createRootNode();
+		trial->createDimensions();
+		trial->setNetworkIDNode();
+		trial->setProbSuccessNode();
+		trial->xml2Char();
+		const char* theXML = trial->getBuffer();
+
+		Sender *theSender = new Sender;
+		theSender->setHostName("localhost");
+		theSender->setPortNumber(4554);
+		theSender->createSocket();
+		theSender->sendBuffer(theXML,strlen(theXML));
+
+		delete message;
+		delete trial;
+
+	}
+
+	else {
+		std::cout << "usage: " << argv[0] << " server|client" << std::endl;
+		return (1);
+	}
+	return (0);
+
+}
 

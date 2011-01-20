@@ -30,7 +30,7 @@ DataPolling.mexa64:    $(LOCAL) $(HDEP) DataPolling.c++ DataPolling.o
 	$(MEX) $(MEXFLAGS) -o DataPolling  DataPolling.o $(LOCAL) $(LIB) $(LDLIB) $(OFLAGS) $(INCLUDE) 
 
 trial:	trial.c++ $(LOCAL)
-	$(CC) -o trial trial.c++ $(OFLAGS) $(CFLAGS) $(INCLUDE) XMLMessageNetwork.o XMLParser.o XMLIncomingDIF.o $(LIB) 
+	$(CC) -o trial trial.c++ $(OFLAGS) $(CFLAGS) $(INCLUDE) $(LOCAL) $(LIB) 
 	
 sender:	sender.o
 	$(CC) $(OFLAGS) $(CFLAGS) -o $@ $< $(INCLUDE)

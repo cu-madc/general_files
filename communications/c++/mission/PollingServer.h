@@ -77,7 +77,7 @@
 class PollingServer {
 
 public:
-	PollingServer(int portNumber=POLLING_SERVER_DEFAULT_PORT);
+	PollingServer(int startThread=1,int portNumber=POLLING_SERVER_DEFAULT_PORT);
 	~PollingServer();
 	static void *pollingLoop(void *ptr);     // Method that contains the separate thread started for the server.
 	void pollingLoop();                      // Specific to the class object. Handles the polling of the socket.
