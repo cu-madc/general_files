@@ -176,7 +176,10 @@ void XMLParser::copyXMLTree(xmlDocPtr existingDocument){
 
 }
 
-xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,const char *name,const char *contents){
+xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,
+													const char *nodeName,
+													const char *name,
+													const char *contents){
 	/**
 	 * Routine to walk through the tree and find the node that contains a child with the given name
 	 * and associated contents.
@@ -201,13 +204,15 @@ xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,const 
 		if(sibling->type == XML_ELEMENT_NODE) {
 			// This node is an element.
 			//std::cout << "   now checking node name: " << sibling->name << std::endl;
-			if(checkChildrenForNameAndContents(sibling->children,name,contents)) {
-				return(sibling);
+			if (strcmp((char *) sibling->name, nodeName) == 0) {
+				if (checkChildrenForNameAndContents(sibling->children, name,contents)) {
+					return (sibling);
+				}
 			}
 		}
 
 		// Check to see if the target is any of this node's children.
-		checkChildren = walkObjectChildrenByNameContents(sibling->children,name,contents);
+		checkChildren = walkObjectChildrenByNameContents(sibling->children,nodeName,name,contents);
 		if(checkChildren) {
 			// A match was found. Return it.
 			return(checkChildren);
@@ -220,7 +225,9 @@ xmlNode* XMLParser::walkObjectChildrenByNameContents(xmlNode *currentNode,const 
 
 }
 
-int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,const char *name,const char *contentsToMatch){
+int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,
+												const char *name,
+												const char *contentsToMatch){
 	/*
 	 * Routine to walk through each of the children of the current node. If it has a
 	 * node with the given name and whose contents match the given value then the

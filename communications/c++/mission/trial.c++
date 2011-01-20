@@ -76,16 +76,16 @@
 
 
 	message->copyXMLTree(trial->getXMLDocument());
-	xmlNode* node = message->walkObjectChildrenByNameContents(message->getRootNode(),"name","vacuumNetwork");
+	xmlNode* node = message->walkObjectChildrenByNameContents(message->getRootNode(),"dimension","name","probabilitySuccessfulTransmission");
 
 	if (node) {
 		std::cout << "Found it: " << (void *)node << std::endl;
 		for (node = node->children; node; node = node->next) {
 			if (node->type == XML_ELEMENT_NODE) {
-				//char *contents = (char *) xmlNodeGetContent(node);
-				//if (contents) {
-				//	std::cout << "Content: " << contents << std::endl;
-				//}
+				char *contents = (char *) xmlNodeGetContent(node);
+				if (contents) {
+					std::cout << "Content: " << contents << std::endl;
+				}
 			}
 		}
 	}

@@ -83,7 +83,7 @@ public:
 	virtual void copyXMLTree(xmlDocPtr existingDocument);  // makes a copy of the parsed xml document.
 
 	// Routine to walk through the tree and find the node that contains a child with the given name and associated contents.
-	xmlNode* walkObjectChildrenByNameContents(xmlNode *currentNode,const char *name,const char *contents);
+	xmlNode* walkObjectChildrenByNameContents(xmlNode *currentNode,const char *nodeName,const char *name,const char *contents);
 	int checkChildrenForNameAndContents(xmlNode *currentNode,const char *name,const char *contentsToMatch);
 
 	void xml2Char();                 // Returns the (char) xml data

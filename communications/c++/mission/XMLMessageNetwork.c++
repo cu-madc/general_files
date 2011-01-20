@@ -154,7 +154,9 @@ void XMLMessageNetwork::copyXMLTree(xmlDocPtr existingDocument){
 	XMLParser::copyXMLTree(existingDocument);
 
 	if(root_node) {
-
+		objectClassNode = walkObjectChildrenByNameContents(root_node,"objectClass","name","vacuumNetwork");
+		networkIDNode   = walkObjectChildrenByNameContents(root_node,"dimension","name","networkID");
+		probSuccessNode = walkObjectChildrenByNameContents(root_node,"dimension","name","probabilitySuccessfulTransmission");
 	}
 
 }
