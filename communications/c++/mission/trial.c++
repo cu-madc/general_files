@@ -78,9 +78,28 @@ int main(int argc, char **argv) {
 	}
 
 	else if (strcmp(argv[1], "client") == 0) {
-		XMLSendLocal *trial = new XMLSendLocal;
-		trial->sendNULLXMLTree();
+		//XMLSendLocal *trial = new XMLSendLocal;
+		//trial->sendNULLXMLTree();
+		//delete trial;
+
+		XMLMessageNetwork *trial = new XMLMessageNetwork;
+		trial->setNetworkID(2);
+		trial->setProbSuccessfulTransmission(0.5);
+		trial->createRootNode();
+		trial->createDimensions();
+		trial->setNetworkIDNode();
+		trial->setProbSuccessNode();
+		trial->xml2Char();
+		const char* theXML = trial->getBuffer();
+
+		Sender *theSender = new Sender;
+		theSender->setHostName("localhost");
+		theSender->setPortNumber(4554);
+		theSender->createSocket();
+		theSender->sendBuffer(theXML, strlen(theXML));
+
 		delete trial;
+		delete theSender;
 	}
 
 	else {

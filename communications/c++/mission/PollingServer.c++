@@ -419,6 +419,12 @@ XMLParser* PollingServer::determineIncomingXMLTreeType(char* buffer,int bufferLe
 	if(parentNode) {
 		// This is an empty node. Do nothing.
 		std::cout << "EMPTY!" << std::endl;
+	} else {
+		parentNode = determineType->walkObjectChildrenByNameContents(determineType->getRootNode(),
+																	  "objectClass","name","vacuumNetwork");
+		if(parentNode){
+			std::cout << "Vacuum!" << std::endl;
+		}
 	}
 
 	delete determineType;
