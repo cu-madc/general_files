@@ -75,6 +75,9 @@ XMLParser::XMLParser() {
 	 *
 	 **/
 
+	// initialize my type
+	myType = EMPTY;
+
 	// initialize the xml parameters
 	doc = NULL;
 	root_node = NULL;

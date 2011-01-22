@@ -37,16 +37,16 @@
  * met:
  *
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided
- * with the distribution.
+ *   copyright notice, this list of conditions and the following
+ *   disclaimer in the documentation and/or other materials provided
+ *   with the distribution.
  *
  * * Neither the name of the Clarkson University nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -261,7 +261,8 @@ void PollingServer::pollingLoop() {
 
 			XMLParser* incomingInformation = determineIncomingXMLTreeType(localBuffer,nread);
 			if(incomingInformation) {
-				delete incomingInformation;
+				// Add this to the list of items that have been passed in to through the socket.
+				incomingDataList.push_back(incomingInformation);
 			}
 
 		}
@@ -293,7 +294,7 @@ void PollingServer::pollingLoop() {
 }
 
 
-int PollingServer::exchangeInformation() {
+int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck) {
 	/** *********************************************************************
 	 * Method to exchange data from a local buffer into a matlab variable.
 	 * ******************************************************************** **/
@@ -311,11 +312,13 @@ int PollingServer::exchangeInformation() {
 
 	for (std::list<XMLParser*>::iterator it = incomingDataList.begin();
 			it != incomingDataList.end(); ++it) {
-		// TODO - need to figure out how to transfer the information!
-		if (*it == NULL) {
+		// Check to see if the type is the same as what I am expecting.
+		if ((*it)->getMyInformationType()==typeToCheck){ //XMLParser::VACUUM_NETWORK) {
 			std::list<XMLParser*>::iterator place = it--;
 			incomingDataList.erase(place);
 			//std::cout << "  erasing";
+			// TODO - figure out how to react to something of this type and exchange the information.
+			delete *place;
 		}
 	}
 

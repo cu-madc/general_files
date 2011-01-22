@@ -91,11 +91,19 @@ public:
 	xmlNode* getRootNode() { return root_node;};
 
 
+	enum InformationType { EMPTY, VACUUM_NETWORK, VACUUM_STATE, CONTROLER_NETWORK};
+	void setMyInformationType(InformationType value){ myType = value;}
+	InformationType getMyInformationType() {return myType;}
+
+
 protected:
 	// xml parser and tree variables
 	xmlParserCtxtPtr ctxt;
 	xmlDoc *doc;
 	xmlNode *root_node;
+
+	// My type
+	InformationType myType;
 
 	// Buffer variables
 	char fileBuffer[SIZE_READ_FILE_BUFFER];
