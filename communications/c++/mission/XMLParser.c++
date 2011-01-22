@@ -285,14 +285,22 @@ void XMLParser::xml2Char() {
 
 }
 
+void XMLParser::cleanUpDocument() {
+	/*free the document */
+	if(doc) {
+		xmlFreeDoc(doc);
+	}
+
+}
+
 void XMLParser::cleanUpXML() {
 	/**
 	 * Clean up and free the data and variables associated with the parsed
 	 * XML tree.
 	 **/
 
-	/*free the document */
-	xmlFreeDoc(doc);
+	// Clean up the document
+	cleanUpDocument();
 
 	/* free up the parser context */
 	xmlFreeParserCtxt(ctxt);

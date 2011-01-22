@@ -60,6 +60,7 @@
 
 #include "XMLMessageNetwork.h"
 #include "XMLIncomingDIF.h"
+#include "XMLSendLocal.h"
 #include "PollingServer.h"
 #include "Sender.h"
 
@@ -74,31 +75,12 @@ int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "server") == 0) {
 		PollingServer *server = new PollingServer(0);
-
 	}
 
 	else if (strcmp(argv[1], "client") == 0) {
-		XMLMessageNetwork *trial = new XMLMessageNetwork;
-		XMLMessageNetwork *message = new XMLMessageNetwork;
-
-		trial->setNetworkID(2);
-		trial->setProbSuccessfulTransmission(0.5);
-		trial->createRootNode();
-		trial->createDimensions();
-		trial->setNetworkIDNode();
-		trial->setProbSuccessNode();
-		trial->xml2Char();
-		const char* theXML = trial->getBuffer();
-
-		Sender *theSender = new Sender;
-		theSender->setHostName("localhost");
-		theSender->setPortNumber(4554);
-		theSender->createSocket();
-		theSender->sendBuffer(theXML,strlen(theXML));
-
-		delete message;
+		XMLSendLocal *trial = new XMLSendLocal;
+		trial->sendNULLXMLTree();
 		delete trial;
-
 	}
 
 	else {

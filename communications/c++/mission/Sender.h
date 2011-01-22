@@ -65,6 +65,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
 #define MAXBUFFERSIZE 4554
 #define SERVER_DEFAULT_PORT 4554
@@ -78,6 +79,7 @@ public:
 
 	// static variables used to determine the parameters of the socket.
 	static const int BufferSize = MAXBUFFERSIZE;
+	static const int DefaultPortNumber = SERVER_DEFAULT_PORT;
 
 	// utility methods to set the local variables
 	void setHostName(const char* newHostName) { hostname = newHostName;}

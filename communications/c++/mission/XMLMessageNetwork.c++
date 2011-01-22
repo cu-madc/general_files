@@ -81,7 +81,7 @@ void XMLMessageNetwork::createRootNode() {
 	/**
 	 *  Method to create the root node in the xml tree. Sets the scheme information as well.
 	 **/
-
+	cleanUpDocument();
 	doc = xmlNewDoc(BAD_CAST "1.0");
 	root_node = xmlNewNode(NULL, BAD_CAST "objectModel");
 	xmlDocSetRootElement(doc, root_node);

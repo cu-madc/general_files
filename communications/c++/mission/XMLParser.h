@@ -85,6 +85,7 @@ public:
 
 	void xml2Char();                 // Returns the (char) xml data
 	void parseXMLBuffer();           // Parses the xml file in the current buffer.
+	void cleanUpDocument();            // Frees up the document if it exists.
 	void cleanUpXML();               // cleans up the data associated with the parsed xml tree
 
 	xmlNode* getRootNode() { return root_node;};

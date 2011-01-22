@@ -1,13 +1,11 @@
 /*
- * Sender.c++
+ * XMLSendLocal.h
  *
- *  Created on: Jan 20, 2011
+ *  Created on: Jan 22, 2011
  *      Author: black
- *
- *
- *      Class to act as a client using a tcp connection. This
- *      will take a machine name, a port number, and data and
- *      send it to the destination using tcp.
+ *		Used to send messages to this machine. It assumes that the machine has an
+ *		active polling process running. It is helpful to send information to the
+ *		thread that has been spawned and cannot be easily contacted via other means.
  *
  *
  * This material is based on research sponsored by DARPA under agreement
@@ -61,67 +59,26 @@
  *
  */
 
-#include <iostream>
-#include <netdb.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <netdb.h>
+#ifndef XMLSENDLOCAL_H_
+#define XMLSENDLOCAL_H_
 
 #include "Sender.h"
+#include "XMLParser.h"
 
-Sender::Sender() {
+class XMLSendLocal: public Sender, public XMLParser {
+public:
+	XMLSendLocal(int portNumber=Sender::DefaultPortNumber);
+	~XMLSendLocal();
+	void createRootNode();
+	void createObjectClass();
+	void addObjectClassName(const char* name);
+	void createNULLXMLTree();
+	void sendNULLXMLTree();
 
-}
+protected:
 
-Sender::~Sender() {
+private:
+	xmlNode *objectClassNode;
+};
 
-}
-
-int Sender::createSocket(){
-	createSocket(hostname,portNumber);
-}
-
-int Sender::createSocket(const char* newHostName, int newPortNumber) {
-	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (clientSocket == -1) {
-		std::cout << "Error - Could not create a socket." << std::endl;
-		return (EXIT_FAILURE);
-	}
-
-	memset(&localConnection, 0, sizeof(struct sockaddr_in));
-	localConnection.sin_family = AF_INET;
-	localConnection.sin_port = htons(4554);
-	hp = gethostbyname("localhost");
-
-	memcpy((char*) &localConnection.sin_addr, (char*) hp->h_addr_list[0],
-			hp->h_length);
-
-	if (connect(clientSocket, (sockaddr *) &localConnection,
-			sizeof(localConnection)) != 0) {
-		std::cout << "Error - cannot connect to host." << std::endl;
-		return (EXIT_FAILURE);
-	}
-
-	return (0);
-}
-
-int Sender::closeSocket() {
-
-	if (shutdown(clientSocket, SHUT_RDWR) != 0) {
-		std::cout << "Error shutting down the socket." << std::endl;
-		return (EXIT_FAILURE);
-	}
-	close(clientSocket);
-	return (0);
-
-}
-
-int Sender::sendBuffer(const char* buffer, int size) {
-	return (send(clientSocket, buffer, size, 0));
-}
-
-int Sender::recvBuffer() {
-	return (recv(clientSocket, localBuffer, BufferSize, 0));
-}
-
+#endif /* XMLSENDLOCAL_H_ */
