@@ -60,9 +60,6 @@
 
 #include <libxml/tree.h>
 #include <libxml/parser.h>
-#include <iostream>
-#include <fstream>
-#include <string.h>
 
 #define SIZE_READ_FILE_BUFFER	131072
 #define SIZE_READ_DTD_BUFFER    262144

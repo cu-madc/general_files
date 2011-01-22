@@ -61,6 +61,14 @@
  *
  */
 
+#include <iostream>
+#include <netdb.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
 #include "Sender.h"
 
 Sender::Sender() {

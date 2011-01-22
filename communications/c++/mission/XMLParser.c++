@@ -63,6 +63,9 @@
  */
 
 #include <iostream>
+#include <fstream>
+#include <string.h>
+
 #include "XMLParser.h"
 
 XMLParser::XMLParser() {

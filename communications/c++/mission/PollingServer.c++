@@ -73,6 +73,7 @@
 #include <iostream>
 #endif
 
+#include <netdb.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>

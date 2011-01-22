@@ -60,6 +60,9 @@
  *
  */
 
+#include <iostream>
+#include <fstream>
+#include <string.h>
 #include "XMLIncomingDIF.h"
 
 XMLIncomingDIF::XMLIncomingDIF(){

@@ -63,15 +63,8 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
-#include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
 #define MAXBUFFERSIZE 4554
 #define SERVER_DEFAULT_PORT 4554

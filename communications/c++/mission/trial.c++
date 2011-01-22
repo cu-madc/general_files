@@ -56,6 +56,8 @@
  */
 
 #include <iostream>
+#include <string.h>
+
 #include "XMLMessageNetwork.h"
 #include "XMLIncomingDIF.h"
 #include "PollingServer.h"
