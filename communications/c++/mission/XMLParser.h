@@ -74,9 +74,9 @@ public:
 	int readXMLFile(const char *fileName); // routine to read an xml file. (Used for debugging.)
 	int readDTDFile(const char *fileName); // routine to read a dtd file.
 
-	const char* getBuffer() { return fileBuffer;}; // returns the pointer to the buffer
-	xmlDoc* getXMLDocument() { return doc; };// returns the pointer to the document.
-	void setXMLBuffer(const char *buf, int size);  // copies the buffer over into the local buffer
+	const char* getBuffer() { return fileBuffer;};         // returns the pointer to the buffer
+	xmlDoc* getXMLDocument() { return doc; };              // returns the pointer to the document.
+	void setXMLBuffer(const char *buf, int size);          // copies the buffer over into the local buffer
 	virtual void copyXMLTree(xmlDocPtr existingDocument);  // makes a copy of the parsed xml document.
 
 	// Routine to walk through the tree and find the node that contains a child with the given name and associated contents.
@@ -85,7 +85,7 @@ public:
 
 	void xml2Char();                 // Returns the (char) xml data
 	void parseXMLBuffer();           // Parses the xml file in the current buffer.
-	void cleanUpDocument();            // Frees up the document if it exists.
+	void cleanUpDocument();          // Frees up the document if it exists.
 	void cleanUpXML();               // cleans up the data associated with the parsed xml tree
 
 	xmlNode* getRootNode() { return root_node;};

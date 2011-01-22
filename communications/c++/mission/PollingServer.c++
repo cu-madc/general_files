@@ -81,6 +81,7 @@
 #include <errno.h>
 #include "PollingServer.h"
 #include "XMLIncomingDIF.h"
+#include "XMLMessageNetwork.h"
 #include "XMLParser.h"
 
 
@@ -93,7 +94,10 @@ PollingServer::PollingServer(int startThread,int portNumber) :
 	 * ******************************************************************** */
 
 
-	running(0), serverSocket(0), numberInBuffer(0) {
+	running(0), serverSocket(0), numberInBuffer(0),incomingDataList() {
+
+
+	incomingDataList.clear();
 
 #ifdef MATLAB
 	mexPrintf("Starting polling server\n");
@@ -178,6 +182,16 @@ PollingServer::~PollingServer() {
 #endif
 		pthread_exit(NULL);
 	}
+
+
+	// Delete all of the data objects in my list of incoming data.
+	for (std::list<XMLParser*>::iterator it = incomingDataList.begin(); it
+			!= incomingDataList.end(); ++it) {
+		//cout << (*it)->getMyOne() << endl;
+		delete (*it);
+	}
+	incomingDataList.clear();
+
 
 }
 
@@ -285,12 +299,27 @@ int PollingServer::exchangeInformation() {
 	 * ******************************************************************** **/
 
 	pthread_mutex_lock(&(mutexUpdateData));
-	sleep(2);
+
+
 #ifdef MATLAB
 	mexPrintf("Got information\n");
 #else
+	sleep(2);
 	std::cout << "Got information" << std::endl;
 #endif
+
+
+	for (std::list<XMLParser*>::iterator it = incomingDataList.begin();
+			it != incomingDataList.end(); ++it) {
+		// TODO - need to figure out how to transfer the information!
+		if (*it == NULL) {
+			std::list<XMLParser*>::iterator place = it--;
+			incomingDataList.erase(place);
+			//std::cout << "  erasing";
+		}
+	}
+
+
 	pthread_mutex_unlock(&(mutexUpdateData));
 
 }
@@ -418,16 +447,34 @@ XMLParser* PollingServer::determineIncomingXMLTreeType(char* buffer,int bufferLe
 																		  "objectClass","name","empty");
 	if(parentNode) {
 		// This is an empty node. Do nothing.
+#ifdef MATLAB
+		mexWarnMsgTxt("Got an empty xml file.");
+#else
 		std::cout << "EMPTY!" << std::endl;
+#endif
+
 	} else {
 		parentNode = determineType->walkObjectChildrenByNameContents(determineType->getRootNode(),
 																	  "objectClass","name","vacuumNetwork");
 		if(parentNode){
+
+#ifdef MATLAB
+			mexWarnMsgTxt("Got a network vacuum tree.");
+#else
 			std::cout << "Vacuum!" << std::endl;
+#endif
+
+			thePointer = (XMLParser*)new XMLMessageNetwork;
+			thePointer->copyXMLTree(determineType->getXMLDocument());
+			incomingDataList.push_back(thePointer);
+
 		}
 	}
 
 	delete determineType;
 	return(thePointer);
 }
+
+
+
 

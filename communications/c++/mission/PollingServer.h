@@ -68,7 +68,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-class XMLParser;
+// data tracking include files
+#include <list>
+#include "XMLParser.h"
 
 #define POLLING_SERVER_DEFAULT_PORT 4554
 
@@ -127,6 +129,9 @@ private:
 	static const int BUFFER_SIZE = 4096;     // Max size of the buffer
 	char buf[BUFFER_SIZE];                   // buffer used to
 	int  numberInBuffer;                     // Number of bytes used in buf
+
+	// Variables used to keep track of the data.
+	std::list<XMLParser*> incomingDataList;
 
 };
 
