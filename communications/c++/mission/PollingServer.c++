@@ -80,14 +80,19 @@
 #include <string.h>
 #include <errno.h>
 #include "PollingServer.h"
+#include "XMLIncomingDIF.h"
+#include "XMLParser.h"
+
 
 #define DEBUG 0
 #define POLLING_SERVER_BUFFER_SIZE 1024
 
-/* *********************************************************************
- * Constructor for the PollingServer class.
- * ******************************************************************** */
 PollingServer::PollingServer(int startThread,int portNumber) :
+	/* *********************************************************************
+	 * Constructor for the PollingServer class.
+	 * ******************************************************************** */
+
+
 	running(0), serverSocket(0), numberInBuffer(0) {
 
 #ifdef MATLAB
@@ -140,10 +145,11 @@ PollingServer::PollingServer(int startThread,int portNumber) :
 
 }
 
-/* *********************************************************************
- * class destructor.
- * ******************************************************************** */
+
 PollingServer::~PollingServer() {
+	/* *********************************************************************
+	 * class destructor.
+	 * ******************************************************************** */
 
 	//mexPrintf("Deleting the PollingServer object. Turn off the socket first.");
 
@@ -175,6 +181,7 @@ PollingServer::~PollingServer() {
 
 }
 
+
 void *PollingServer::pollingLoop(void *ptr) {
 	/** *********************************************************************
 	 * Static routine to act as a pointer for starting up a new thread.
@@ -184,6 +191,7 @@ void *PollingServer::pollingLoop(void *ptr) {
 	thePollingServer->pollingLoop(); // Start the polling loop.
 
 }
+
 
 void PollingServer::pollingLoop() {
 	/** *********************************************************************
@@ -236,6 +244,12 @@ void PollingServer::pollingLoop() {
 			std::cout << "Received " << nread << " bytes from " << host
 					<< " : " << service << std::endl;
 #endif
+
+			XMLParser* incomingInformation = determineIncomingXMLTreeType(localBuffer,nread);
+			if(incomingInformation) {
+				delete incomingInformation;
+			}
+
 		}
 
 		else {
@@ -264,6 +278,7 @@ void PollingServer::pollingLoop() {
 
 }
 
+
 int PollingServer::exchangeInformation() {
 	/** *********************************************************************
 	 * Method to exchange data from a local buffer into a matlab variable.
@@ -279,6 +294,7 @@ int PollingServer::exchangeInformation() {
 	pthread_mutex_unlock(&(mutexUpdateData));
 
 }
+
 
 int PollingServer::createAndInitializeSocket() {
 	/** *********************************************************************
@@ -341,6 +357,7 @@ int PollingServer::createAndInitializeSocket() {
 	return (0);
 }
 
+
 int PollingServer::shutdownSocket(int silent) {
 	/** *********************************************************************
 	 * Close down and turn off the socket. Returns zero if successful.
@@ -375,10 +392,36 @@ int PollingServer::shutdownSocket(int silent) {
 
 }
 
-/* *********************************************************************
- * Destory the mutex that has been created in the constructor.
- * ******************************************************************** */
+
+
 int PollingServer::destroyMutex() {
+	/* *********************************************************************
+	 * Destory the mutex that has been created in the constructor.
+	 * ******************************************************************** */
+
 	return (pthread_mutex_destroy(&mutexUpdateData));
+}
+
+
+XMLParser* PollingServer::determineIncomingXMLTreeType(char* buffer,int bufferLength){
+	/**
+	 *	Determine what kind of xml tree was just sent in. Return a pointer to the class that
+	 *	contains it. The XMLParser class is a base class for all of the XML container classes.
+	 **/
+
+	XMLParser *thePointer = NULL;
+	XMLIncomingDIF *determineType = new XMLIncomingDIF;
+	determineType->setXMLBuffer(buffer,bufferLength);
+	determineType->parseXMLBuffer();
+
+	xmlNode *parentNode = determineType->walkObjectChildrenByNameContents(determineType->getRootNode(),
+																		  "objectClass","name","empty");
+	if(parentNode) {
+		// This is an empty node. Do nothing.
+		std::cout << "EMPTY!" << std::endl;
+	}
+
+	delete determineType;
+	return(thePointer);
 }
 

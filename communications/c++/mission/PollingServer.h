@@ -68,7 +68,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
+class XMLParser;
 
 #define POLLING_SERVER_DEFAULT_PORT 4554
 
@@ -104,6 +104,9 @@ public:
 	}
 
 protected:
+
+	XMLParser* determineIncomingXMLTreeType(char* buffer,int bufferLength);
+
 	pthread_t pollingThread;                  // For keeping track of the polling thread.
 	pthread_mutex_t mutexUpdateData;          // The mutex used in the polling thread.
 
