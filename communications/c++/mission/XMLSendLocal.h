@@ -74,6 +74,7 @@ public:
 	void addObjectClassName(const char* name);
 	void createNULLXMLTree();
 	void sendNULLXMLTree();
+	virtual void copyInformation(double *vec,int number);
 
 protected:
 

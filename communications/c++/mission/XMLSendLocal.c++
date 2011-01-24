@@ -62,9 +62,7 @@
 #include <string.h>
 #include "XMLSendLocal.h"
 
-XMLSendLocal::XMLSendLocal(int portNumber) {
-	// Call the parser constructor to initialize the necessary parts of the xml tree.
-	XMLParser();
+XMLSendLocal::XMLSendLocal(int portNumber) : XMLParser() {
 
 	// Call the parts of the sender class to create the socket for communications.
 	Sender::Sender();
@@ -136,4 +134,9 @@ void XMLSendLocal::sendNULLXMLTree() {
 	sendBuffer(theXML,strlen(theXML));
 }
 
+
+void XMLSendLocal::copyInformation(double *vec,int number) {
+	// empty routine to allow this class to be able to be realized
+	return;
+}
 

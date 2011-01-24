@@ -91,9 +91,11 @@ public:
 	xmlNode* getRootNode() { return root_node;};
 
 
-	enum InformationType { EMPTY, VACUUM_NETWORK, VACUUM_STATE, CONTROLER_NETWORK};
+	// Routines for exchanging information.
+	enum InformationType { EMPTY, CHECK_INCOMING, VACUUM_NETWORK, VACUUM_STATE, CONTROLER_NETWORK};
 	void setMyInformationType(InformationType value){ myType = value;}
 	InformationType getMyInformationType() {return myType;}
+	virtual void copyInformation(double *vec,int number) = 0;
 
 
 protected:

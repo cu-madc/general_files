@@ -85,7 +85,8 @@ public:
 	int shutdownSocket(int silent=1);        // Shuts down the socket.
 	int destroyMutex();                      // Destroys the mutex creates in the constructor.
 
-	int exchangeInformation(XMLParser::InformationType typeToCheck);  // Copy local buffer information over to matlab variables.
+	// Copy local buffer information over to matlab variables.
+	int exchangeInformation(XMLParser::InformationType typeToCheck,double *vec,int num);
 
 	void setRunning(const int value) {
 		// Sets the value of the running variable.

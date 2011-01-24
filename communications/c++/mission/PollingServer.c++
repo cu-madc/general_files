@@ -262,7 +262,9 @@ void PollingServer::pollingLoop() {
 			XMLParser* incomingInformation = determineIncomingXMLTreeType(localBuffer,nread);
 			if(incomingInformation) {
 				// Add this to the list of items that have been passed in to through the socket.
+				pthread_mutex_lock(&(mutexUpdateData));
 				incomingDataList.push_back(incomingInformation);
+				pthread_mutex_unlock(&(mutexUpdateData));
 			}
 
 		}
@@ -276,6 +278,7 @@ void PollingServer::pollingLoop() {
 #endif
 		}
 
+		/*
 		if (send(s, buf, nread, 0) != nread) {
 #ifdef MATLAB
 			mexPrintf("Error sending response\n");
@@ -283,6 +286,7 @@ void PollingServer::pollingLoop() {
 			std::cout << "Error sending response" << std::endl;
 #endif
 		}
+		*/
 
 		shutdown(s, SHUT_RDWR);
 		close(s);
@@ -294,12 +298,10 @@ void PollingServer::pollingLoop() {
 }
 
 
-int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck) {
+int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck,double *vec,int num) {
 	/** *********************************************************************
 	 * Method to exchange data from a local buffer into a matlab variable.
 	 * ******************************************************************** **/
-
-	pthread_mutex_lock(&(mutexUpdateData));
 
 
 #ifdef MATLAB
@@ -314,16 +316,15 @@ int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck) {
 			it != incomingDataList.end(); ++it) {
 		// Check to see if the type is the same as what I am expecting.
 		if ((*it)->getMyInformationType()==typeToCheck){ //XMLParser::VACUUM_NETWORK) {
+			pthread_mutex_lock(&(mutexUpdateData));
 			std::list<XMLParser*>::iterator place = it--;
+			(*place)->copyInformation(vec,num);
 			incomingDataList.erase(place);
 			//std::cout << "  erasing";
-			// TODO - figure out how to react to something of this type and exchange the information.
 			delete *place;
+			pthread_mutex_unlock(&(mutexUpdateData));
 		}
 	}
-
-
-	pthread_mutex_unlock(&(mutexUpdateData));
 
 }
 
@@ -455,6 +456,7 @@ XMLParser* PollingServer::determineIncomingXMLTreeType(char* buffer,int bufferLe
 #else
 		std::cout << "EMPTY!" << std::endl;
 #endif
+		return(NULL);
 
 	} else {
 		parentNode = determineType->walkObjectChildrenByNameContents(determineType->getRootNode(),
@@ -469,7 +471,6 @@ XMLParser* PollingServer::determineIncomingXMLTreeType(char* buffer,int bufferLe
 
 			thePointer = (XMLParser*)new XMLMessageNetwork;
 			thePointer->copyXMLTree(determineType->getXMLDocument());
-			incomingDataList.push_back(thePointer);
 
 		}
 	}

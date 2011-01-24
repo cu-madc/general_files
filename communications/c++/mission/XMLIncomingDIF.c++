@@ -65,9 +65,8 @@
 #include <string.h>
 #include "XMLIncomingDIF.h"
 
-XMLIncomingDIF::XMLIncomingDIF(){
-	// Call the constructor from the base class.
-	XMLParser();
+XMLIncomingDIF::XMLIncomingDIF() : XMLParser(){
+	setMyInformationType(CHECK_INCOMING);
 }
 
 XMLIncomingDIF::~XMLIncomingDIF() {
@@ -148,6 +147,12 @@ xmlNode* XMLIncomingDIF::walkObjectName(xmlNode *currentNode,const char *name){
 	// No match was found. Return null.
 	return(NULL);
 
+}
+
+
+void XMLIncomingDIF::copyInformation(double *vec,int number){
+	// Empty routine so that I can realize an object of this class.
+	return;
 }
 
 

@@ -78,6 +78,8 @@ public:
 	// part of the tree.
 	xmlNode* walkObjectName(xmlNode *currentNode,const char *name);
 
+	virtual void copyInformation(double *vec,int number);
+
 protected:
 
 private:

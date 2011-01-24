@@ -63,9 +63,9 @@
 #include "XMLMessageNetwork.h"
 
 XMLMessageNetwork::XMLMessageNetwork() :
-	networkID(0), probSuccessfulTransmission(1.0) {
+	networkID(0), probSuccessfulTransmission(1.0), XMLIncomingDIF() {
 
-	XMLIncomingDIF();
+	setMyInformationType(VACUUM_NETWORK);
 	dimensionsNode = NULL;
 	objectClassNode = NULL;
 	networkIDNode = NULL;
@@ -159,6 +159,13 @@ void XMLMessageNetwork::copyXMLTree(xmlDocPtr existingDocument){
 		probSuccessNode = walkObjectChildrenByNameContents(root_node,"dimension","name","probabilitySuccessfulTransmission");
 	}
 
+}
+
+void XMLMessageNetwork::copyInformation(double *vec,int number) {
+	if(number >= 2) {
+		vec[0] = (double)networkID;
+		vec[1] = probSuccessfulTransmission;
+	}
 }
 
 /*Get the root element node */

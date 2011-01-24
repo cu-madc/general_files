@@ -87,6 +87,7 @@ public:
 	                           // is successfully passed along.
 
 	void copyXMLTree(xmlDocPtr existingDocument);  // makes a copy of the parsed xml document.
+	virtual void copyInformation(double *vec,int number);
 
 protected:
 
