@@ -60,6 +60,7 @@
  */
 
 #include <iostream>
+#include <stdlib.h>
 #include "XMLMessageNetwork.h"
 
 XMLMessageNetwork::XMLMessageNetwork() :
@@ -150,19 +151,39 @@ void XMLMessageNetwork::copyXMLTree(xmlDocPtr existingDocument){
 	 * Copy the given parsed XML tree into the local tree. Also set the
 	 * relevant nodes that this class tracks from the tree.
 	 **/
+	xmlNode *node;
 
 	XMLParser::copyXMLTree(existingDocument);
 
 	if(root_node) {
 		objectClassNode = walkObjectChildrenByNameContents(root_node,"objectClass","name","vacuumNetwork");
 		networkIDNode   = walkObjectChildrenByNameContents(root_node,"dimension","name","networkID");
+		if(networkIDNode) {
+			// Get the value of the network ID in the tree and set it for this instance
+			node = getChildWithName(networkIDNode,"value");
+			if(node) {
+				//std::cout << "Found ID Node: " << xmlNodeGetContent(node) << std::endl;
+				setNetworkID(strtol((char*)xmlNodeGetContent(node),NULL,10));
+			}
+		}
+
 		probSuccessNode = walkObjectChildrenByNameContents(root_node,"dimension","name","probabilitySuccessfulTransmission");
+		if(probSuccessNode) {
+			// Get the value of the prob. in the tree and set it for this instance.
+			node = getChildWithName(probSuccessNode,"value");
+			if(node) {
+				//std::cout << "Found prob Node: " << xmlNodeGetContent(node) << std::endl;
+				setProbSuccessfulTransmission(strtod((char *)xmlNodeGetContent(node),NULL));
+			}
+		}
+
 	}
 
 }
 
 void XMLMessageNetwork::copyInformation(double *vec,int number) {
 	if(number >= 2) {
+		std::cout << "Copying the information: " << networkID << " - " << probSuccessfulTransmission << std::endl;
 		vec[0] = (double)networkID;
 		vec[1] = probSuccessfulTransmission;
 	}

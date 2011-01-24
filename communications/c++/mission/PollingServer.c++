@@ -83,6 +83,8 @@
 #include "XMLIncomingDIF.h"
 #include "XMLMessageNetwork.h"
 #include "XMLParser.h"
+#include "XMLSendLocal.h"
+
 
 
 #define DEBUG 0
@@ -156,6 +158,13 @@ PollingServer::~PollingServer() {
 	 * ******************************************************************** */
 
 	//mexPrintf("Deleting the PollingServer object. Turn off the socket first.");
+
+	// Send an empty message to send to the open socket and shut it down.
+	setRunning(0);
+	XMLSendLocal *mySender = new XMLSendLocal(getPort());
+	mySender->sendNULLXMLTree();
+	delete mySender;
+
 
 	// The server needs to be shut down. Destroy the mutex and shut down the socket.
 	if (!shutdownSocket(0)) {
@@ -305,10 +314,9 @@ int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck,do
 
 
 #ifdef MATLAB
-	mexPrintf("Got information\n");
+	mexPrintf("Checking for incoming\n");
 #else
-	sleep(2);
-	std::cout << "Got information" << std::endl;
+	std::cout << "Checking for incoming" << std::endl;
 #endif
 
 
@@ -323,8 +331,10 @@ int PollingServer::exchangeInformation(XMLParser::InformationType typeToCheck,do
 			//std::cout << "  erasing";
 			delete *place;
 			pthread_mutex_unlock(&(mutexUpdateData));
+			return(1);
 		}
 	}
+	return(0);
 
 }
 

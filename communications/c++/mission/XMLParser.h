@@ -82,6 +82,7 @@ public:
 	// Routine to walk through the tree and find the node that contains a child with the given name and associated contents.
 	xmlNode* walkObjectChildrenByNameContents(xmlNode *currentNode,const char *nodeName,const char *name,const char *contents);
 	int checkChildrenForNameAndContents(xmlNode *currentNode,const char *name,const char *contentsToMatch);
+	xmlNode* getChildWithName(xmlNode *currentNode,const char *name);
 
 	void xml2Char();                 // Returns the (char) xml data
 	void parseXMLBuffer();           // Parses the xml file in the current buffer.

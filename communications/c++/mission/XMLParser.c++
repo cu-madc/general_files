@@ -177,7 +177,7 @@ void XMLParser::copyXMLTree(xmlDocPtr existingDocument){
 
 	/*Get the root element node */
 	root_node = xmlDocGetRootElement(doc);
-	//std::cout << " root node pointer: " << (void *)root_node << std::endl;
+	std::cout << " root node pointer: " << (void *)root_node << std::endl;
 
 
 }
@@ -244,8 +244,9 @@ int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,
 	xmlChar *content;       // content of a node
 
 	for (sibling = currentNode; sibling; sibling = sibling->next) {
-		content = xmlNodeGetContent(sibling);
+
 		if (sibling->type == XML_ELEMENT_NODE) {
+			content = xmlNodeGetContent(sibling);
 			//std::cout << "      checking node name:" << sibling->name
 			//		<< "#" << name << "# "
 			//		<< "* contents:" << (char *)content << "*"
@@ -262,6 +263,28 @@ int XMLParser::checkChildrenForNameAndContents(xmlNode *currentNode,
 	}
 
 	return(0);
+
+}
+
+xmlNode* XMLParser::getChildWithName(xmlNode *currentNode,const char *name){
+	/*
+	 * Routine to walk through the children and return the node whose name
+	 * matches the value passed through.
+	 */
+
+	xmlNode *sibling = NULL; // siblings to check
+	xmlChar *content;        // content of a node
+	for(sibling=currentNode->children;sibling;sibling=sibling->next){
+		if (sibling->type == XML_ELEMENT_NODE) {
+			content = xmlNodeGetContent(sibling);
+			if (strcmp((char *) sibling->name, name) == 0) {
+				return (sibling);
+			}
+		}
+
+	}
+
+	return(NULL);
 
 }
 

@@ -57,6 +57,7 @@
 
 #include <iostream>
 #include <string.h>
+#include <unistd.h>
 
 #include "XMLMessageNetwork.h"
 #include "XMLIncomingDIF.h"
@@ -68,13 +69,32 @@ int main(int argc, char **argv) {
 	char name[100];
 	name[0] = 0;
 
+	double values[2];
+	int repeat = 0;
+	int check;
+
 	if (argc < 2) {
 		std::cout << "usage: " << argv[0] << " server|client" << std::endl;
 		return (1);
 	}
 
 	if (strcmp(argv[1], "server") == 0) {
-		PollingServer *server = new PollingServer(0);
+		PollingServer *server = new PollingServer(1);
+
+		while(repeat<2) {
+			sleep(2);
+			std::cout << "Checking" << std::endl;
+			check = 1;
+			while(check) {
+				check = server->exchangeInformation(XMLParser::VACUUM_NETWORK,values,2);
+				if(check) {
+					std::cout << "Got something: " << values[0] << " - " << values[1] << std::endl;
+					repeat += 1;
+				}
+			}
+		}
+
+		delete server;
 	}
 
 	else if (strcmp(argv[1], "client") == 0) {
