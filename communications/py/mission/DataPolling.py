@@ -61,55 +61,41 @@
 #include "string.h"
 #include "PollingServer.h"
 #include "XMLMessageNetwork.h"
+from PollingServer import PollingServer
 
-PollingServer* theServer = NULL;
+theServer = PollingServer()
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+def DataPolling(nlhs,plh,nrhs,prhs) :
 
-	char *input_specifier;
+    input_specifier = ""
 
-	//mexPrintf("Starting up\n");
+	 # **********************************************************************************
+	 # This is very preliminary. At this point the routine expects just one argument
+	 # when called and returns none. The one argument is a string and should either be
+	 # "start" or "end." If it is "start" then it creates an object and starts the socket
+	 # and polling loop. If it is "end" then it sets a variable to let the polling loop
+	 # exit the next time it goes through.
+	 # ********************************************************************************** */
 
-	/* **********************************************************************************
-	 * This is very preliminary. At this point the routine expects just one argument
-	 * when called and returns none. The one argument is a string and should either be
-	 * "start" or "end." If it is "start" then it creates an object and starts the socket
-	 * and polling loop. If it is "end" then it sets a variable to let the polling loop
-	 * exit the next time it goes through.
-	 * ********************************************************************************** */
-
-	if ((nrhs == 1) && (mxIsChar(prhs[0]))) {
-		input_specifier = mxArrayToString(prhs[0]);
-		//mexPrintf("Got one character: *%s*\n", input_specifier);
+    if ((nrhs == 1) and (type(prhs) is "str")) :
+        input_specifier = prhs
 
 
-		if (strcmp(input_specifier, "start") == 0) {
-			//mexPrintf("Starting server\n");
-			theServer = new PollingServer;
-			if(theServer->getRunning()==0) {
-				// There was an error trying to start the polling server.
-				delete theServer;
-				theServer = NULL;
-			}
+        if (input_specifier == "start") :
+            theServer = PollingServer()
+            if(theServer.getRunning()==0) :
+                # There was an error trying to start the polling server.
+                theServer = None
 
-		}
+            elif ((theServer != None) and (input_specifier == "end")) :
+                    theServer.setRunning(-1);
 
-		else if ((theServer != NULL) && (strcmp(input_specifier, "end") == 0)) {
-			//mexPrintf("Stopping server\n");
-			theServer->setRunning(-1);
-		}
+            else :
+                    print("Unrecognized command.");
 
-		else {
-			mexErrMsgTxt("Unrecognized command.");
-		}
 
-	} else {
-		mexErrMsgTxt("Unrecognized command");
-	}
-
-	return;
-
-}
+        else:
+            print("Unrecognized command");
 
 
 
