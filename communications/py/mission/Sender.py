@@ -73,7 +73,9 @@ class Sender :
 
 
         def __init__(self,port=DefaultPortNumber) :
-            setPortNumber(port)
+            if(self.DEBUG) :
+                print("Creating sender object: {0}".format(port))
+            self.setPortNumber(port)
 
 
         def setHostname(self,name) :
@@ -100,7 +102,7 @@ class Sender :
                 print("Creating connection for {0}".format(theHost))
                     
             self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            socketInfo = socket.gethostbyaddr(host)
+            socketInfo = socket.gethostbyaddr(theHost)
             
             try:
                 # Try to make the connection.
@@ -172,5 +174,6 @@ if (__name__ =='__main__') :
 	import time
 	
 	print("testing sender")
-        mySender = Sender;
-        mysender.sendString("This is a test",socket.gethostname())
+        mySender = Sender();
+        mySender.sendString("This is a test",socket.gethostname())
+        

@@ -88,6 +88,7 @@ class PollingServer:
 	POLLING_SERVER_BUFFER_SIZE = 4096
 	BUFFER_SIZE = 4096;                    # Max size of the buffer
 
+	DEBUG = True;
 
 
 
@@ -111,22 +112,13 @@ class PollingServer:
 
 		#  Initialize the port number to use
 		self.setPort(portNumber);
-		self.setHostName(socket.gethostname())
+		self.setHostname(socket.gethostname())
 
 
-		#if (createAndInitializeSocket()) :
-			#  Could not create and set up the socket for the polling loop.
-		#	destroyMutex();
-		#	return;
-
-
-		#  Create the thread and return to the calling program.
-		#setRunning(1); #  Assume it is okay to receive information.
-		#if (startThread) :
-		#	pthread_create(&pollingThread, None, PollingServer::pollingLoop,
-		#			(void*) this);
-		#else:
-		#	pollingLoop();
+		if(startThread) :
+			if(self.DEBUG) :
+				print("Starting socket server")
+			self.createAndInitializeSocket()
 
 
 
@@ -137,33 +129,21 @@ class PollingServer:
 		# * class destructor.
 		# ******************************************************************** */
 
+		if(self.DEBUG) :
+			print("Shutting down the PollingServer object.");
 
 		#  Send an empty message to send to the open socket and shut it down.
-		setRunning(False);
+		self.setRunning(False);
                 #XMLSendLocal *mySender = new XMLSendLocal(getPort());
                 #mySender->sendNULLXMLTree();
                 #delete mySender;
 
-
-		#  The server needs to be shut down. Destroy the mutex and shut down the socket.
-                #if (!shutdownSocket(0)) :
-		#     print("Unable to shutdown the socket.")
-		# else :
-                #std::cout << "Turned off the socket server." << std::endl;
-
-
-		if getRunning() :
+		if self.getRunning() :
 			self.stopServerSocket()
 			self.destroyMutex()
 			print("Exiting the thread.")
 			#pthread_exit(None);
 
-
-		#  Delete all of the data objects in my list of incoming data.
-                #for (std::list<XMLParser*>::iterator it = incomingDataList.begin(); it
-		#       != incomingDataList.end(); ++it) {
-		      # cout << (*it)->getMyOne() << endl;
-		      #delete (*it);
 
                 #incomingDataList.clear();
 
@@ -184,7 +164,7 @@ class PollingServer:
 		self.serverPort = value;
 
 
-	def getPort() :
+	def getPort(self) :
 		# Returns the value of the port used for the socket
 		return(self.serverPort);
 
@@ -194,7 +174,7 @@ class PollingServer:
 		self.hostname = value;
 
 
-	def getHostname() :
+	def getHostname(self) :
 		# Returns the value of the port used for the socket
 		return(self.hostname);
 
@@ -213,16 +193,19 @@ class PollingServer:
 	       # Poll the queue periodically
 	       self.setRunning(True)
 	       threading.Timer(1.0, self.checkIncomingQueue).start()
+	       if(self.DEBUG) :
+		       print("Timer started for checking the queue")
 
 
 	       # Start the server on a separate thread.
 	       self.socketServer = IncomingSocketServer( \
-		       (self.getHostName(),self.getPort()),LocalTCPHandler,self)
+		       (self.getHostname(),self.getPort()),LocalTCPHandler,self)
 	       self.serverThread = threading.Thread(target=self.socketServer.serve_forever)
 	       self.serverThread.setDaemon(True)
 	       self.serverThread.start()
-	       self.printMessage("Started thread: %s listening on %s:%s" % \
-				 (self.serverThread.getName(),self.getHostName(),self.getPort()))
+	       if(self.DEBUG) :
+		       print("Started thread: {0} listening on {1}:{2}".format
+			     (self.serverThread.getName(),self.getHostname(),self.getPort()))
 
 
 
@@ -235,11 +218,13 @@ class PollingServer:
 	        ## Stop the existing socket server. 
 
 		self.setRunning(False)
+		if(self.DEBUG) :
+			print("Stopping the server socket.")
 		
 		try:
 		    self.socketServer.shutdown()
 		except:
-		    if(printError) :
+		    if(self.DEBUG) :
 			print("Error - unable to shut down the socket server.")
 		    return(False)
 
@@ -253,7 +238,9 @@ class PollingServer:
 	##
 	## Routine to check the queue for any completed requests
 	def checkIncomingQueue(self) :
-		#self.printMessage("checking")
+
+		if(self.DEBUG) :
+			print("checking the incoming queue")
 
 		numberItems = 0
 		self.lock = self.serverThread.Lock()
@@ -261,7 +248,8 @@ class PollingServer:
 		while(not self.incomingTCP.empty()):
 		    # Something has been passed in from the interwebz
 		    entry = self.incomingTCP.get()
-		    print("Got this: {0}".format(entry))
+		    if(self.DEBUG) :
+			    print("Got this: {0}".format(entry))
 		    numberItems += 1
 
 
@@ -335,6 +323,9 @@ class IncomingSocketServer (ThreadingMixIn, TCPServer):
     def __init__(self,connectionInfo,handler,parent) :
         self.myParent = parent
         #ThreadingMixIn.__init__(self)
+	if(parent.DEBUG) :
+		print("Created the socket server class: {0}".format(connectionInfo))
+
         TCPServer.__init__(self,connectionInfo,handler)
 
 
@@ -353,11 +344,13 @@ class LocalTCPHandler (BaseRequestHandler):
 
     def handle(self) :
         socket = self.request
-        theHost = self.server.myParent.getClientContactInfo(self.client_address[0],0)        
-        self.printMessage("Heard from %s-%s" % (self.client_address[0],theHost))
+	socketInfo = socket.gethostbyaddr(self.client_address[0])
+	if(self.DEBUG) :
+		print("Heard from {0}-{1}".format(self.client_address[0],socketInfo[0]))
 
 	data = self.request.recv(PollingServer.POLLING_SERVER_BUFFER_SIZE).strip()
-	print("Confirmed Client: {0}".format(data))
+	if(self.DEBUG) :
+		print("Confirmed Client: {0}".format(data))
 	self.request.send("OK")
 	self.server.myParent.incomingTCP.put({'data':data})
 
@@ -365,4 +358,13 @@ class LocalTCPHandler (BaseRequestHandler):
 
 
 if (__name__ =='__main__') :
+	import time
+	
 	print("testing")
+	polling = PollingServer(True)
+	steps = 70
+	while(steps>0) :
+		time.sleep(2.0)
+		steps -= 1
+		print("Waiting Step {0}".format(70-steps))
+	
