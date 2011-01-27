@@ -69,8 +69,8 @@ from XMLParser import XMLParser
 class XMLIncomingDIF (XMLParser) :
 
     def __init__(self) :
-	#self.setMyInformationType(CHECK_INCOMING);
         XMLParser.__init__(self)
+        self.setMyInformationType(XMLParser.CHECK_INCOMING);
 
 
     def __del__(self):

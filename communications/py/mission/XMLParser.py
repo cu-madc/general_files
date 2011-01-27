@@ -71,11 +71,13 @@ class XMLParser :
 
 	SIZE_READ_FILE_BUFFER =	131072
 	SIZE_READ_DTD_BUFFER  = 262144
+	DEBUG = True
 
 
 
-
-	#enum InformationType { EMPTY, CHECK_INCOMING, VACUUM_NETWORK, VACUUM_STATE, CONTROLER_NETWORK};
+	EMPTY, CHECK_INCOMING, VACUUM_NETWORK, \
+	       VACUUM_STATE, CONTROLER_NETWORK = range(5)
+	
 
 
 	#char fileBuffer[SIZE_READ_FILE_BUFFER];
@@ -103,7 +105,7 @@ class XMLParser :
 
 
 		#  initialize my type
-		self.setMyInformationType(None) #EMPTY);
+		self.setMyInformationType(XMLParser.EMPTY);
 
 		#  initialize the xml parameters
 		self.doc = None;
@@ -115,6 +117,9 @@ class XMLParser :
 		#  zero out the buffers
 		#memset(fileBuffer, 0, SIZE_READ_FILE_BUFFER);
 		#memset(dtdBuffer, 0, SIZE_READ_DTD_BUFFER);
+
+		if(self.DEBUG) :
+			print("XML Parser initialized.");
 
 
 
