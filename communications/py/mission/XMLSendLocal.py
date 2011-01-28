@@ -61,8 +61,9 @@
 # 
 
 from XMLParser import XMLParser
+from Sender import Sender
 
-class XMLSendLocal (XMLParser) :
+class XMLSendLocal (XMLParser,Sender) :
 
 
     def __init__(self) :

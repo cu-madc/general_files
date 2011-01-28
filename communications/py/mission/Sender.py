@@ -103,12 +103,13 @@ class Sender :
                     
             self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socketInfo = socket.gethostbyaddr(theHost)
+	    
             
             try:
                 # Try to make the connection.
                 if(self.DEBUG) :
-                    print("Trying to connect to {0}:{1}".format(socketInfo[0],socketInfo[1]))
-                self.clientSocket.connect(socketInfo)
+                    print("Trying to connect to {0}:{1}".format(socketInfo[0],self.getPortNumber()))
+                self.clientSocket.connect((socketInfo[0],self.getPortNumber()))
 
             except:
                 # We were unable to make the connection.
@@ -175,5 +176,8 @@ if (__name__ =='__main__') :
 	
 	print("testing sender")
         mySender = Sender();
-        mySender.sendString("This is a test",socket.gethostname())
+        #mySender.sendString("This is a test",socket.gethostname())
+	received = mySender.sendString("This is a test","localhost")
+	if(received) :
+	    print("head back: {0}".format(received))
         
