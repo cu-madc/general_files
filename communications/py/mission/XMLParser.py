@@ -63,11 +63,10 @@
 #  
 #
 
-#include <libxml/tree.h>
-#include <libxml/parser.h>
+import xml.sax.handler
 
 
-class XMLParser :
+class XMLParser (xml.sax.handler.ContentHandler):
 
 	SIZE_READ_FILE_BUFFER =	131072
 	SIZE_READ_DTD_BUFFER  = 262144
@@ -91,18 +90,10 @@ class XMLParser :
 		#
 		#
 
-		# xml parser and tree variables
-		#xmlParserCtxtPtr ctxt;
-		#xmlDoc *doc;
-		#xmlNode *root_node;
-
-		#My type
-		#InformationType myType;
-
 		# Buffer variables
 		#char fileBuffer[SIZE_READ_FILE_BUFFER];
 		#char dtdBuffer[SIZE_READ_DTD_BUFFER];
-
+		self.XMLStack = []
 
 		#  initialize my type
 		self.setMyInformationType(XMLParser.EMPTY);
@@ -110,6 +101,7 @@ class XMLParser :
 		#  initialize the xml parameters
 		self.doc = None;
 		self.root_node = None;
+		self.currentName = ""
 
 		#  create a parser context # 
 		#self.ctxt = xmlNewParserCtxt();
@@ -149,18 +141,35 @@ class XMLParser :
 
 
 
+	def startElement(self, name, attributes):
+		if(self.currentName) :
+			self.XMLStack.append([self.currentName])
+
+		if(self.DEBUG) :
+			print("Start: {0}".format(name))
+			print("Stack: {0}".format(self.XMLStack))
+
+		self.currentName = name
+		if(name == "objectclass"):
+			pass
+
+
+	def endElement(self, name):
+
+		if(self.DEBUG) :
+		        print("End element: {0} Buffer: ".format(name))
+			print("Stack: {0}".format(self.XMLStack))
+
+		if(len(self.XMLStack)>0) :
+			self.currentName = self.XMLStack.pop()
+		else :
+			self.currentName = ""
+		
 	def parseXMLBuffer(self) :
 		# *
 		# Parse the contents of the buffer and put them into an XML tree.
 		#  
 
-		# parse the file and get the DOM # 
-		## doc = xmlReadFile("HLAstandardMIM.xml","IEEE1516-DIF-2010.xsd",XML_PARSE_DTDVALID);
-		# doc = xmlCtxtReadDoc(ctxt, (xmlChar *) fileBuffer, None, dtdBuffer, 0
-		#	& XML_PARSE_DTDVALID);
-
-		# Get the root element node # 
-		#root_node = xmlDocGetRootElement(doc);
 		pass
 
 
@@ -214,7 +223,7 @@ class XMLParser :
 		# Copy the given parsed XML tree into the local tree.
 		#  
 
-		if(doc) :
+		if(self.doc) :
 			#xmlFreeDoc(doc);
 			pass
 
@@ -340,7 +349,7 @@ class XMLParser :
 
 	def cleanUpDocument(self) :
 		# free the document # 
-		if(doc) :
+		if(self.doc) :
 			#xmlFreeDoc(doc);
 			pass
 			
@@ -371,3 +380,14 @@ class XMLParser :
 
 
 
+if (__name__ =='__main__') :
+    handler = XMLParser()
+
+    file = open("networkSample.xml","r")
+    theXML = ""
+    for line in file:
+	theXML += line
+	#print(line[0:-1])
+
+    print(theXML)
+    xml.sax.parseString(theXML,handler)
