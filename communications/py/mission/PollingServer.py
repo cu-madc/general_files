@@ -71,6 +71,7 @@ from SocketServer import *
 import socket
 import threading
 
+
 import re
 
 
@@ -98,54 +99,52 @@ class PollingServer:
 	    # ******************************************************************** */
 
 
-		#pthread_mutex_t self.mutexUpdateData;          #  The mutex used in the polling thread.
-		self.incomingTCP = Queue()
-		self.lock = None
+	    self.incomingTCP = Queue()
 
-		#  Variables for the state of the polling process
-		self.setRunning(startThread)
+	    #  Variables for the state of the polling process
+	    self.setRunning(startThread)
 
 
-		#  Variables used to keep track of the data.
-		self.incomingDataList = Queue();
+	    #  Variables used to keep track of the data.
+	    self.incomingDataList = Queue()
+	    self.dataLock = threading.Lock()
 
 
-		#  Initialize the port number to use
-		self.setPort(portNumber);
-		self.setHostname(socket.gethostname())
+	    #  Initialize the port number to use
+	    self.setPort(portNumber);
+	    self.setHostname('localhost') #socket.gethostname())
 
-
-		if(startThread) :
-			if(self.DEBUG) :
-				print("Starting socket server")
-			self.createAndInitializeSocket()
+	    if(startThread) :
+		    if(self.DEBUG) :
+			    print("Starting socket server")
+		    self.createAndInitializeSocket()
 
 
 
 
 
 	def __del__(self):
-		# *********************************************************************
-		# * class destructor.
-		# ******************************************************************** */
+	   # *********************************************************************
+	   # * class destructor.
+	   # ******************************************************************** */
 
-		if(self.DEBUG) :
-			print("Shutting down the PollingServer object.");
+	   if(self.DEBUG) :
+		   print("Shutting down the PollingServer object.");
 
-		#  Send an empty message to send to the open socket and shut it down.
-		self.setRunning(False);
-                #XMLSendLocal *mySender = new XMLSendLocal(getPort());
-                #mySender->sendNULLXMLTree();
-                #delete mySender;
+	   #  Send an empty message to send to the open socket and shut it down.
+	   self.setRunning(False);
+	   #XMLSendLocal *mySender = new XMLSendLocal(getPort());
+	   #mySender->sendNULLXMLTree();
+	   #delete mySender;
 
-		if self.getRunning() :
-			self.stopServerSocket()
-			self.destroyMutex()
-			print("Exiting the thread.")
-			#pthread_exit(None);
+	   if self.getRunning() :
+		   self.stopServerSocket()
+		   self.destroyMutex()
+		   print("Exiting the thread.")
+		   #pthread_exit(None);
 
 
-                #incomingDataList.clear();
+	   #incomingDataList.clear();
 
 
 	   
@@ -198,8 +197,10 @@ class PollingServer:
 
 
 	       # Start the server on a separate thread.
+	       #handler = LocalTCPHandler(self)
 	       self.socketServer = IncomingSocketServer( \
 		       (self.getHostname(),self.getPort()),LocalTCPHandler,self)
+
 	       self.serverThread = threading.Thread(target=self.socketServer.serve_forever)
 	       self.serverThread.setDaemon(True)
 	       self.serverThread.start()
@@ -243,19 +244,24 @@ class PollingServer:
 			print("checking the incoming queue")
 
 		numberItems = 0
-		self.lock = self.serverThread.Lock()
+		self.dataLock.acquire()
 		entry = None
 		while(not self.incomingTCP.empty()):
 		    # Something has been passed in from the interwebz
 		    entry = self.incomingTCP.get()
 		    if(self.DEBUG) :
-			    print("Got this: {0}".format(entry))
+			    print("Incomging queue: {0}".format(entry))
 		    numberItems += 1
 
 
 		entry = None
-		self.lock.release()
-		self.lock = None
+
+		try:
+		    self.dataLock.notify()
+		except AttributeError:
+		    pass
+	    
+		self.dataLock.release()
 
 		if(self.getRunning()) :
 		    threading.Timer(1.0, self.checkIncomingQueue).start()
@@ -270,9 +276,9 @@ class PollingServer:
 		# Destory the mutex that has been created in the constructor.
 		# ******************************************************************** */
 
-		if(self.lock) :
-			self.lock.release();
-			self.lock = None
+		if(self.dataLock) :
+			self.dataLock.release();
+			self.dataLock = None
 
 
 
@@ -343,28 +349,60 @@ class LocalTCPHandler (BaseRequestHandler):
     #    pass
 
     def handle(self) :
-        socket = self.request
 	socketInfo = socket.gethostbyaddr(self.client_address[0])
-	if(self.DEBUG) :
-		print("Heard from {0}-{1}".format(self.client_address[0],socketInfo[0]))
+	#if(PollingServer.DEBUG) :
+	#	print("Heard from {0}-{1}".format(self.client_address[0],socketInfo[0]))
 
 	data = self.request.recv(PollingServer.POLLING_SERVER_BUFFER_SIZE).strip()
-	if(self.DEBUG) :
-		print("Confirmed Client: {0}".format(data))
+	#if(PollingServer.DEBUG) :
+	#	print("Confirmed Client: {0}".format(data))
 	self.request.send("OK")
-	self.server.myParent.incomingTCP.put({'data':data})
+
+	self.server.myParent.dataLock.acquire()
+	self.server.myParent.incomingTCP.put(data)
+
+	try:
+	    self.server.myParent.dataLock.notify()
+        except AttributeError:
+	    pass
+        self.server.myParent.dataLock.release()
 
 
 
 
 if (__name__ =='__main__') :
 	import time
+	import sys
+
+	if (len(sys.argv)==1) :
+		sys.argv.append("client")
 	
-	print("testing")
-	polling = PollingServer(True)
-	steps = 70
-	while(steps>0) :
-		time.sleep(2.0)
-		steps -= 1
-		print("Waiting Step {0}".format(70-steps))
+	if (sys.argv[1]=="server") :
+		print("testing")
+		polling = PollingServer(True)
+		steps = 4
+		while(steps>0) :
+			time.sleep(4.0)
+			steps -= 1
+			print("Waiting Step {0}".format(10-steps))
+		polling.setRunning(False)
+
+	else :
+		print("client")
+		HOST, PORT = "localhost", PollingServer.POLLING_SERVER_DEFAULT_PORT
+		data = "Joba loves you " 
+
+		# Create a socket (SOCK_STREAM means a TCP socket)
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+		# Connect to server and send data
+		sock.connect((HOST, PORT))
+		sock.send(data + "\n")
+
+		# Receive data from the server and shut down
+		received = sock.recv(1024)
+		sock.close()
+
+		print("Sent:     {0}".format(data))
+		print("Received: {0}".format(received))
 	
