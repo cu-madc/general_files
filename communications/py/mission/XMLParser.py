@@ -63,180 +63,176 @@
 #  
 #
 
-import xml.sax.handler
+import xml.sax     #.handler
 
 
 class XMLParser (xml.sax.handler.ContentHandler):
 
-	SIZE_READ_FILE_BUFFER =	131072
-	SIZE_READ_DTD_BUFFER  = 262144
-	DEBUG = True
+    SIZE_READ_FILE_BUFFER =	131072
+    SIZE_READ_DTD_BUFFER  = 262144
+    DEBUG = True
 
 
 
-	EMPTY, CHECK_INCOMING, VACUUM_NETWORK, \
-	       VACUUM_STATE, CONTROLER_NETWORK = range(5)
+    EMPTY, CHECK_INCOMING, VACUUM_NETWORK, \
+	   VACUUM_STATE, CONTROLER_NETWORK = range(5)
 	
 
 
-	#char fileBuffer[SIZE_READ_FILE_BUFFER];
-	#char dtdBuffer[SIZE_READ_DTD_BUFFER];
+    #char fileBuffer[SIZE_READ_FILE_BUFFER];
+    #char dtdBuffer[SIZE_READ_DTD_BUFFER];
 
 
-	def __init__(self) : 
-		# *
-		# constructor for the XMLParser class. Initializes the xml variables.
-		# Initializes the character buffers.
-		#
-		#
+    def __init__(self) : 
+	# *
+	# constructor for the XMLParser class. Initializes the xml variables.
+	# Initializes the character buffers.
+	#
+	#
 
-		# Buffer variables
-		#char fileBuffer[SIZE_READ_FILE_BUFFER];
-		#char dtdBuffer[SIZE_READ_DTD_BUFFER];
-		self.XMLStack = []
+	# Buffer variables
+	self.XMLStack = []
+	self.currentStack = []
 
-		#  initialize my type
-		self.setMyInformationType(XMLParser.EMPTY);
+	#  initialize my type
+	self.setMyInformationType(XMLParser.EMPTY);
 
-		#  initialize the xml parameters
-		self.doc = None;
-		self.root_node = None;
-		self.currentName = ""
+	#  initialize the xml parameters
+	self.doc = None;
+	self.root_node = None;
+	self.currentName = ""
 
-		#  create a parser context # 
-		#self.ctxt = xmlNewParserCtxt();
 
-		#  zero out the buffers
-		#memset(fileBuffer, 0, SIZE_READ_FILE_BUFFER);
-		#memset(dtdBuffer, 0, SIZE_READ_DTD_BUFFER);
-
-		if(self.DEBUG) :
-			print("XML Parser initialized.");
+	if(self.DEBUG) :
+	    print("XML Parser initialized.");
 
 
 
-	def __del__(self):
-		#  Destructor for the XMLParser class. Release and
-		# delete the parsed XML data structures.
-		#  
+    def __del__(self):
+	#  Destructor for the XMLParser class. Release and
+	# delete the parsed XML data structures.
+	#  
 
 
-		#  Delete/release the xml data structures.
-		self.cleanUpXML();
+	#  Delete/release the xml data structures.
+	self.cleanUpXML();
 
 
-	def getBuffer(self) :
-		return self.fileBuffer         #  returns the pointer to the buffer
+    def getBuffer(self) :
+        return self.fileBuffer         #  returns the pointer to the buffer
 
 	
-	def getXMLDocument(self) :
-		return self.doc           #  returns the pointer to the document.
+    def getXMLDocument(self) :
+        return self.doc           #  returns the pointer to the document.
 
 	
-	def setMyInformationType(self,value) :
-		self.myType = value;
+    def setMyInformationType(self,value) :
+        self.myType = value;
 		
-	def getMyInformationType(self) :
-		return self.myType;
+    def getMyInformationType(self) :
+        return self.myType;
 
 
+    def startDocument(self):
+        self.XMLStack = []
+	self.currentStack = []
+	xml.sax.handler.ContentHandler.startDocument(self)
 
-	def startElement(self, name, attributes):
-		if(self.currentName) :
-			self.XMLStack.append([self.currentName])
-
-		if(self.DEBUG) :
-			print("Start: {0}".format(name))
-			print("Stack: {0}".format(self.XMLStack))
-
-		self.currentName = name
-		if(name == "objectclass"):
-			pass
+	if(self.DEBUG):
+	     print("starting to read the document");
 
 
-	def endElement(self, name):
+    def endDocument(self):
+         if(len(self.currentStack)>0) :
+	     if(self.DEBUG) :
+	         print("There is an error in the XML.")
+	 self.currentStack = []
+	 xml.sax.handler.ContentHandler.endDocument(self)
 
-		if(self.DEBUG) :
-		        print("End element: {0} Buffer: ".format(name))
-			print("Stack: {0}".format(self.XMLStack))
+	 if(self.DEBUG):
+	     print("End of the document:\n{0}".format(self.XMLStack));
 
-		if(len(self.XMLStack)>0) :
-			self.currentName = self.XMLStack.pop()
-		else :
-			self.currentName = ""
+
+    def startElement(self, name, attributes):
+
+        self.currentStack.append([name,attributes.copy(),"",[]])
+			
+	if(self.DEBUG) :
+	    for child in attributes.getNames():
+	        print("Child: {0} - {1}".format(child,attributes.getValue(child)))
+
+	self.currentName = name
+	if(name == "objectclass"):
+	      pass
+
+    def characters(self,data) :
+        last = self.currentStack[-1]
+        last[-2] += data
+
+    def endElement(self, name):
+
+	thisElement = []
+	if((type(self.currentStack) is list) and (len(self.currentStack)>0)) :
+	     thisElement = self.currentStack.pop()
+	else:
+	     if(self.DEBUG):
+	         print("There is an error in the xml file.")
+
+	if((type(self.currentStack) is list) and (len(self.currentStack)>0)) :
+	    previousElement = self.currentStack.pop()
+	    previousElement[-1].append(thisElement)
+	    self.currentStack.append(previousElement)
+
+	else :
+	    # This is a top level element.
+	    self.XMLStack.append(thisElement)
+	    previousElement = [""]
+
+	#if(self.DEBUG) :
+	#       print("End: {0}".format(name))
+	#        print("XML Stack: {0}".format(self.XMLStack))
+	#        print("Current Stack: {0}\n\n\n".format(self.currentStack))
+
+                
+	self.currentName = previousElement[0]
+
 		
-	def parseXMLBuffer(self) :
-		# *
-		# Parse the contents of the buffer and put them into an XML tree.
-		#  
+    def parseXMLBuffer(self) :
+         # *
+	 # Parse the contents of the buffer and put them into an XML tree.
+	 #  
 
-		pass
-
-
-
-	def readXMLFile(self,*fileName) :
-		# Read an XML file and put it into the local buffer.
-		# This routine is mostly in place for testing and
-		# debugging 4 the xml codes. Returns the number of
-		# characters read from the file.
-		#  
-
-		#std::ifstream inputFile;
-		#char *charPtr = fileBuffer;
-		size = 0
-
-		#inputFile.open(fileName, std::ios::in);           #  Open the file.
-		#memset(fileBuffer, 0, SIZE_READ_FILE_BUFFER);     #  Initialize the buffer.
-		#while ((++size < SIZE_READ_FILE_BUFFER-1) && !inputFile.eof()) {
-		#	#  Get the next character.
-		#	*charPtr++ = inputFile.get();
-
-
-		#*(--charPtr) = 0;    #  Make sure that the last character is null
-		#inputFile.close();   #  close the file.
-		return (size);       #  return the number of characters read.
+	 pass
 
 
 
-	def readDTDFile(self,fileName) :
-		#memset(dtdBuffer, 0, SIZE_READ_DTD_BUFFER);     #  Initialize the buffer.
-		size = self.readXMLFile(fileName);
-		if (size > 0) :
-			#memcpy(dtdBuffer, fileBuffer, size);
-			pass
+    def readXMLFile(self,fileName) :
+	# Read an XML file and put it into the local buffer.
+	# This routine is mostly in place for testing and
+	# debugging 4 the xml codes. 
+	#
 
+	parser = xml.sax.make_parser(['IncrementalParser'])
+	parser.setContentHandler(self)
+	parser.reset()
 
+	file = open(fileName,"r")
+	#theXML = ""
+	for line in file:
+		#theXML += line
+		parser.feed(line)
+	        #print(line[0:-1])
 
-	def setXMLBuffer(self,buf,size) :
-		# *
-		# Copy the given buffer into the local buffer. This needs to be
-		# done before an xml file is parsed into a tree.
-		#  
-		if (size < SIZE_READ_FILE_BUFFER) :
-			#memcpy(fileBuffer, buf, size);
-			pass
-
-
-
-	def copyXMLTree(self,existingDocument) :
-		# *
-		# Copy the given parsed XML tree into the local tree.
-		#  
-
-		if(self.doc) :
-			#xmlFreeDoc(doc);
-			pass
-
-		#doc = xmlCopyDoc(existingDocument,1);
-
-		# Get the root element node # 
-		#root_node = xmlDocGetRootElement(doc);
-		#std::cout << " root node pointer: " << (void *)root_node << std::endl;
+	parser.close()
+	#print(theXML)
+        #xml.sax.parseString(theXML,handler)
 
 
 
 
-	def walkObjectChildrenByNameContents(self,currentNode,nodeName,name,contents) :
+
+
+    def walkObjectChildrenByNameContents(self,currentNode,nodeName,name,contents) :
 		# Routine to walk through the tree and find the node
 		# that contains a child with the given name and
 		# associated contents.
@@ -277,7 +273,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
 
-	def checkChildrenForNameAndContents(self,currentNode,name,contentsToMatch) :
+    def checkChildrenForNameAndContents(self,currentNode,name,contentsToMatch) :
 		# Routine to walk through each of the children of the
 		# current node. If it has a node with the given name
 		# and whose contents match the given value then the
@@ -307,8 +303,8 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
 
-
-	def getChildWithName(self,currentNode,name) :
+	
+    def getChildWithName(self,currentNode,name) :
 		# Routine to walk through the children and return the node whose name
 		# matches the value passed through.
 		# 
@@ -325,7 +321,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
 
-	def xml2Char(self) :
+    def xml2Char(self) :
 		# Convert the parsed XML file in the local root and then
 		# put the char file into the local buffer.
 		#  
@@ -347,7 +343,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 		
 
 
-	def cleanUpDocument(self) :
+    def cleanUpDocument(self) :
 		# free the document # 
 		if(self.doc) :
 			#xmlFreeDoc(doc);
@@ -355,7 +351,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 			
 
 
-	def cleanUpXML(self):
+    def cleanUpXML(self):
 		# Clean up and free the data and variables associated with the parsed
 		# XML tree.
 		#  
@@ -381,13 +377,23 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
 if (__name__ =='__main__') :
+
     handler = XMLParser()
+    handler.readXMLFile("networkSample.xml")
+    exit(0)
+
+    parser = xml.sax.make_parser(['IncrementalParser'])
+    handler = XMLParser()
+    parser.setContentHandler(handler)
+    parser.reset()
 
     file = open("networkSample.xml","r")
     theXML = ""
     for line in file:
 	theXML += line
+	parser.feed(line)
 	#print(line[0:-1])
 
+    parser.close()
     print(theXML)
-    xml.sax.parseString(theXML,handler)
+    #xml.sax.parseString(theXML,handler)
