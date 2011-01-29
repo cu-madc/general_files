@@ -322,52 +322,38 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
     def xml2Char(self) :
-		# Convert the parsed XML file in the local root and then
-		# put the char file into the local buffer.
-		#  
+        # Convert the parsed XML file in the local root and then
+        # put the char file into the local buffer.
+        #  
+        #return(self.doc.toprettyxml(indent="  ",newl="\n"))
+        return(self.doc.toprettyxml(indent="",newl=""))
 
-
-		#xmlChar *xmlbuff;
-		buffersize = 0
-
-		#memset(fileBuffer, 0, SIZE_READ_FILE_BUFFER);          #  initialize the local buffer
-
-		#  Dump the parsed tree into a char value.
-		#xmlDocDumpFormatMemoryEnc(doc, &xmlbuff, &buffersize,"UTF-8",1);
-		if(buffersize<SIZE_READ_FILE_BUFFER) :
-			#  The buffer has room. Copy the xml file over into the local buffer.
-			#memcpy(fileBuffer,(char*)xmlbuff,buffersize);
-			pass
-
-		#xmlFree(xmlbuff);
 		
 
 
     def cleanUpDocument(self) :
-		# free the document # 
-		if(self.doc) :
-			#xmlFreeDoc(doc);
-			pass
-			
+        # free the document # 
+        if(self.doc) :
+            self.doc = None
 
 
     def cleanUpXML(self):
-		# Clean up and free the data and variables associated with the parsed
-		# XML tree.
-		#  
+        # Clean up and free the data and variables associated with the parsed
+        # XML tree.
+        #  
 
-		#  Clean up the document
-		self.cleanUpDocument();
+        #  Clean up the document
+        self.cleanUpDocument();
 
-		#  free up the parser context # 
-		#xmlFreeParserCtxt(ctxt);
+        #  free up the parser context # 
+        #xmlFreeParserCtxt(ctxt);
 
-		# 
-		# Free the global variables that may
-		# have been allocated by the parser.
-		# 
-		#xmlCleanupParser();
-		#xmlMemoryDump();
+        # 
+        # Free the global variables that may
+        # have been allocated by the parser.
+        # 
+        #xmlCleanupParser();
+        #xmlMemoryDump();
 
 
 

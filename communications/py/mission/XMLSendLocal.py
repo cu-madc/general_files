@@ -60,22 +60,23 @@
 # 
 # 
 
+from xml.dom.minidom import Document
 from XMLParser import XMLParser
 from Sender import Sender
 
 class XMLSendLocal (XMLParser,Sender) :
 
 
-    def __init__(self) :
-        XMLParser(self)
+    def __init__(self,portNumber=Sender.DefaultPortNumber) :
+        XMLParser.__init__(self)
 
         self.objectClassNode = None
 
 	#Call the parts of the sender class to create the socket for communications.
 	#Sender::Sender();
-	setPortNumber(portNumber)
-	setHostName("localhost")
-	createSocket()
+	Sender.setPortNumber(self,portNumber)
+	Sender.setHostname(self,"localhost")
+	#Sender.createSocket(self)
 
 
     def __close__(self) :
@@ -84,12 +85,13 @@ class XMLSendLocal (XMLParser,Sender) :
 
     def createRootNode(self) :
 	# Routine to create a null tree that is sent to the local socket server.
-	cleanUpDocument();
+	#cleanUpDocument();
 
 	#Create the document and a root node.
-	#doc = xmlNewDoc(BAD_CAST "1.0");
-	#root_node = xmlNewNode(NULL, BAD_CAST "objectModel");
-	#xmlDocSetRootElement(doc, root_node);
+
+        self.doc = Document()
+	self.root_node = self.doc.createElement("objectModel");
+        self.doc.appendChild(self.root_node)
 	#xmlNewProp(root_node, BAD_CAST "xmlns", BAD_CAST "http://standards.ieee.org/IEEE1516-2010");
 	#xmlNewProp(root_node, BAD_CAST "xmlns:xsi", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
 	#xmlNewProp(root_node, BAD_CAST "xsi:schemaLocation", BAD_CAST "http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd");
@@ -98,52 +100,57 @@ class XMLSendLocal (XMLParser,Sender) :
 
 
 
-        def createObjectClass(self) :
+    def createObjectClass(self) :
 
-            ##
-            # Creates the dimensions node in the xml tree. It adds the objectClass
-            # node as a child of the dimensions node. Finally a "name" node is added
-            # as a child of the dimensions node.
-            ##
+        ##
+        # Creates the dimensions node in the xml tree. It adds the
+        # objectClass node as a child of the dimensions
+        # node. Finally a "name" node is added as a child of the
+        # dimensions node.
+        ##
 
-            ##
-            # xmlNewChild() creates a new node, which is "attached" as child node
-            # of root_node node.
-            ##
+        ##
+        # xmlNewChild() creates a new node, which is "attached" as
+        # child node of root_node node.
+        ##
 
-            #xmlNodePtr node;
-            #node = xmlNewChild(root_node, NULL, BAD_CAST "objects",NULL);
-            #objectClassNode = xmlNewChild(node,NULL,BAD_CAST "objectClass",NULL);
-            pass
-
-
-
-        def addObjectClassName(self,name) :
-            # Adds a child node to the objectClassNode. This assumes that the
-            # createObjectClass method has already been called.
-            if(self.objectClassNode) :
-		self.xmlNewChild(self.objectClassNode,NULL,"name","name");
+        self.objectClassNode = self.doc.createElement("objects")
+        self.root_node.appendChild(self.objectClassNode)
 
 
 
-
-
-        def createNULLXMLTree(self) :
-            self.createRootNode(self)
-            self.createObjectClass(self)
-            self.addObjectClassName(self,"empty")
-
-
-        def sendNULLXMLTree(self) :
-            self.createNULLXMLTree()
-            self.xml2Char()
-            theXML = self.getBuffer()
-            self.sendBuffer(theXML);
+    def addObjectClassName(self,name) :
+        # Adds a child node to the objectClassNode. This assumes that the
+        # createObjectClass method has already been called.
+        if(self.objectClassNode) :
+            nameNode = self.doc.createElement("name")
+            self.objectClassNode.appendChild(nameNode)
+            node = self.doc.createTextNode(name)
+            nameNode.appendChild(node)
 
 
 
-        def copyInformation(self,vec) :
-            # empty routine to allow this class to be able to be realized
-            return
+    def createNULLXMLTree(self) :
+        self.createRootNode()
+        self.createObjectClass()
+        self.addObjectClassName("empty")
 
 
+
+    def sendNULLXMLTree(self) :
+        self.createNULLXMLTree()
+        self.xml2Char()
+        theXML = self.getBuffer()
+        self.sendBuffer(theXML);
+
+
+
+    def copyInformation(self,vec) :
+        # empty routine to allow this class to be able to be realized
+        return
+
+
+if (__name__ =='__main__') :
+    tree = XMLSendLocal()
+    tree.createNULLXMLTree()
+    print(tree.xml2Char())
