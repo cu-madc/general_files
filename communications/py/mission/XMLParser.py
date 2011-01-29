@@ -91,17 +91,10 @@ class XMLParser (xml.sax.handler.ContentHandler):
 	#
 
 	# Buffer variables
-	self.XMLStack = []
-	self.currentStack = []
+        self.cleanUpXML()
 
 	#  initialize my type
 	self.setMyInformationType(XMLParser.EMPTY);
-
-	#  initialize the xml parameters
-	self.doc = None;
-	self.root_node = None;
-	self.currentName = ""
-
 
 	if(self.DEBUG) :
 	    print("XML Parser initialized.");
@@ -119,7 +112,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
     def getBuffer(self) :
-        return self.fileBuffer         #  returns the pointer to the buffer
+        return self.XMLStack      #  returns the pointer to the buffer
 
 	
     def getXMLDocument(self) :
@@ -221,7 +214,8 @@ class XMLParser (xml.sax.handler.ContentHandler):
 	for line in file:
 		#theXML += line
 		parser.feed(line)
-	        #print(line[0:-1])
+                if(self.DEBUG) :
+                    print(line[0:-1])
 
 	parser.close()
 	#print(theXML)
@@ -233,90 +227,73 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
     def walkObjectChildrenByNameContents(self,currentNode,nodeName,name,contents) :
-		# Routine to walk through the tree and find the node
-		# that contains a child with the given name and
-		# associated contents.
-		#  
-
-		#xmlNode *sibling;       #  siblings of current node
-		#xmlNode *checkChildren; #  result from checking children of each sibling
-
-		# std::cout << std::endl << "Searching for node name: "
-		# 			<< name << " with contents "
-		# 			<< contents
-		# 			<< " node pointer: " << (void *)currentNode
-		# 			<< std::endl;
-
-		if(currentNode==None) :
-			return(None); #  The node passed in was null.
+        # Routine to walk through the tree and find the node
+        # that contains a child with the given name and
+        # associated contents.
+        #  
 
 
-		#for(sibling=currentNode;sibling;sibling=sibling->next){
-			#  Go through each of the children of the passed node.
+        if(self.DEBUG) :
+            print("\nSearching for node name: {0} with contents {1} node pointer: ".format(name,contents,currentNode))
 
-		#if(sibling->type == XML_ELEMENT_NODE) {
-		#	#  This node is an element.
-		#	# std::cout << "   now checking node name: " << sibling->name << std::endl;
-		#	if (strcmp((char *) sibling->name, nodeName) == 0) {
-		#		if (checkChildrenForNameAndContents(sibling->children, name,contents)) {
-		#			return (sibling);
-
-		#  Check to see if the target is any of this node's children.
-		checkChildren = self.walkObjectChildrenByNameContents(sibling.children,nodeName,name,contents);
-		if(checkChildren) :
-			#  A match was found. Return it.
-			return(checkChildren);
+        if(currentNode==None) :
+            return(None); #  The node passed in was null.
 
 
-		#  No match was found. Return null.
-		return(None);
+        for sibling in currentNode:
+            #  Go through each of the children of the passed node.
+
+            print("   now checking node name: ".format(sibling[0]))
+            if (sibling[0]==nodeName):
+                if (self.checkChildrenForNameAndContents(sibling[3],name,contents)):
+                    return (sibling);
+
+            #  Check to see if the target is any of this node's children.
+            checkChildren = self.walkObjectChildrenByNameContents \
+                (sibling[3],nodeName,name,contents);
+            if(checkChildren) :
+                #  A match was found. Return it.
+                return(checkChildren);
+
+
+        #  No match was found. Return null.
+        return(None);
 
 
 
     def checkChildrenForNameAndContents(self,currentNode,name,contentsToMatch) :
-		# Routine to walk through each of the children of the
-		# current node. If it has a node with the given name
-		# and whose contents match the given value then the
-		# result is "true." Otherwise return "false."
-		# 
+        # Routine to walk through each of the children of the
+        # current node. If it has a node with the given name
+        # and whose contents match the given value then the
+        # result is "true." Otherwise return "false."
+        # 
 
-		#xmlNode *sibling;       #  siblings of current node
-		#xmlChar *content;       #  content of a node
+        for sibling in currentNode:
 
-		#for (sibling = currentNode; sibling; sibling = sibling->next) {
+            content = sibling[2];
+            if(self.DEBUG) :
+                print("      checking node name:{0}-{1} #{2}#contents#{3}#".format(sibling[0],name,sibling[2],contentsToMatch))
 
-		     #if (sibling->type == XML_ELEMENT_NODE) {
-			#content = xmlNodeGetContent(sibling);
-			## std::cout << "      checking node name:" << sibling->name
-			## 		<< "#" << name << "# "
-			## 		<< "* contents:" << (char *)content << "*"
-			## 		<< contentsToMatch << "*"
-			## 			<< std::endl;
-			#if ((strcmp((char *) sibling->name, name) == 0) &&
-			#	(strcmp((char *) content, contentsToMatch) == 0)) {
-			#	#  The name of the node matches the name that was passed.
-			#	#  Return this node.
-			#	# std::cout << "   THIS IS A MATCH!" << std::endl;
-			#	return (1);
+            if ((sibling[0]==name) and (sibling[2]==contentsToMatch)):
+                #  The name of the node matches the name that was passed.
+                #  Return this node.
+                if(self.DEBUG) :
+                    print("   THIS IS A MATCH!")
+                return (True)
 
-		return(0);
+        return(False)
 
 
 
 	
     def getChildWithName(self,currentNode,name) :
-		# Routine to walk through the children and return the node whose name
-		# matches the value passed through.
-		# 
-
-		#xmlNode *sibling = None; #  siblings to check
-		#xmlChar *content;        #  content of a node
-		#for(sibling=currentNode->children;sibling;sibling=sibling->next){
-		#	if (sibling->type == XML_ELEMENT_NODE) {
-		#		content = xmlNodeGetContent(sibling);
-		#		if (strcmp((char *) sibling->name, name) == 0) {
-		#			return (sibling);
-		return(None);
+        # Routine to walk through the children and return the node whose name
+        # matches the value passed through.
+        # 
+        for sibling in currentNode:
+            if (sibling[0]==name):
+                return (sibling);
+        return(None);
 
 
 
@@ -333,8 +310,7 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
     def cleanUpDocument(self) :
         # free the document # 
-        if(self.doc) :
-            self.doc = None
+        self.doc = None
 
 
     def cleanUpXML(self):
@@ -345,15 +321,13 @@ class XMLParser (xml.sax.handler.ContentHandler):
         #  Clean up the document
         self.cleanUpDocument();
 
-        #  free up the parser context # 
-        #xmlFreeParserCtxt(ctxt);
+	self.XMLStack = []
+	self.currentStack = []
 
-        # 
-        # Free the global variables that may
-        # have been allocated by the parser.
-        # 
-        #xmlCleanupParser();
-        #xmlMemoryDump();
+	#  initialize the xml parameters
+	self.root_node = None;
+	self.currentName = ""
+
 
 
 
@@ -366,6 +340,10 @@ if (__name__ =='__main__') :
 
     handler = XMLParser()
     handler.readXMLFile("networkSample.xml")
+
+    child = handler.walkObjectChildrenByNameContents(handler.getBuffer(),"dimension","name","networkID")
+    print("\n\nThe child: {0}".format(child))
+    print("Current stack:\n{0}".format(handler.getBuffer()))
     exit(0)
 
     parser = xml.sax.make_parser(['IncrementalParser'])
