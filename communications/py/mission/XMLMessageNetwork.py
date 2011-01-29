@@ -67,16 +67,35 @@ class XMLMessageNetwork (XMLIncomingDIF) :
 
 
     def __init__(self) :
-	self.setMyInformationType(VACUUM_NETWORK);
+	self.setMyInformationType(self.VACUUM_NETWORK);
 	self.dimensionsNode = None
 	self.objectClassNode = None
 	self.networkIDNode = None
 	self.probSuccessNode = None
+        self.networkID = 0
+	self.probSuccessfulTransmission = 1.0
 
 
 
     def __del__(self) :
         pass
+
+
+    def getNetworkID(self) :
+        return(self.networkID)
+
+
+    def setNetworkID(self,value) :
+        self.networkID = value
+
+
+    def getProbSuccessfulTransmission(self) :
+        return(self.probSuccessfulTransmission)
+
+
+    def setProbSuccessfulTransmission(self,value) :
+        self.probSuccessfulTransmission = value
+
 
 
     def createRootNode(self) :
@@ -167,3 +186,7 @@ class XMLMessageNetwork (XMLIncomingDIF) :
 
 
 
+
+
+if (__name__ =='__main__') :
+    network = XMLMessageNetwork()
