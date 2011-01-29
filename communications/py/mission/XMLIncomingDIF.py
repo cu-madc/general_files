@@ -77,78 +77,57 @@ class XMLIncomingDIF (XMLParser) :
         pass
 
 
-    def getObjectClassName(self,name,size) :
+    def getObjectClassName(self,name) :
         # Routine to determine the name associated with objectClass
         # part of the xml file.
 
-
-	#xmlChar *content;
-	#int len;
-	#memset(name,0,size);  // initialize the name buffer.
-
 	# Walk through the tree and find the object class node.
-	#xmlNode *objectClass = walkObjectName(root_node,"objectClass");
+        objectClass = self.walkObjectName(self.getBuffer(),"objectClass");
 
-	#if(objectClass) {
-	#	// The object class node was found.
-	#	xmlNode *sibling;
-	#	for(sibling = objectClass->children;sibling;sibling=sibling->next){
-	#		// Go through each of the sibling and look for a name node.
-	#		//std::cout << "objectClass node name: " << sibling->name << std::endl;
-	#		if(strcmp((char *)sibling->name,"name")==0) {
-	#			// Found the name node. Report the value for this node.
-	#			content = xmlNodeGetContent(sibling);
-	#			len= strlen((char*)content);
-	#			memcpy(name,(char *)content,size<len?size:len);
-	#		}
-	#	}
-	#}
+	if(objectClass) :
+            # The object class node was found.
+            if(self.DEBUG):
+                print("\n\nobjectClass: {0}\n".format(objectClass))
 
-	#else {
-	#	// Zero out the buffer that gets returned.
-	#	//std::cout << "object class not found." << std::endl;
-	#	memset(name,0,size);
-	#}
+            for sibling in objectClass[3] :
+                # Go through each of the children and look for a name node.
+                if(self.DEBUG):
+                    print("This node name: {0}".format(sibling[0]))
 
-        print("get object class name")
+                if(sibling[0]=="name") :
+                     # Found the name node. Report the value for this node.
+                    return(sibling[2])
+
+        return(None)
+
+        
 
 
-        def walkObjectName(self,currentNode,name) :
-            # Walk through the current parsed tree and look for the object node.
+    def walkObjectName(self,currentNode,name) :
+        # Walk through the current parsed tree and look for the object node.
 
-            #xmlNode *sibling;       // siblings of current node
-            #xmlNode *checkChildren; // result from checking children of each sibling
+        if(currentNode) :
+            for sibling in currentNode:
+                #  Go through each of the children of the passed node.
 
-            #if(currentNode==NULL) :
-            #    return(NULL); // The node passed in was null.
+                if(sibling[0]==name) :
+                    # The name of the node matches the name that was
+                    # passed.  Return this node.
+                    return(sibling)
 
+                # Check to see if the target is any of this object's children.
+                checkChildren = self.walkObjectName(sibling[3],name);
+                if(checkChildren) :
+                    # A match was found. Return it.
+                    return(checkChildren)
 
-            #for(sibling=currentNode;sibling;sibling=sibling->next){
-            #  Go through each of the children of the passed node.
-            #
-	#	if(sibling->type == XML_ELEMENT_NODE) {
-	#		// This node is an element.
-	#		if(strcmp((char *)sibling->name,name)==0){
-	#			// The name of the node matches the name that was passed.
-	#			// Return this node.
-	#			return(sibling);
-	#		}
-	#	}
-
-        #// Check to see if the target is any of this object's children.
-	#	checkChildren = walkObjectName(sibling->children,name);
-	#	if(checkChildren) {
-	#		// A match was found. Return it.
-	#		return(checkChildren);
-	#	}
-#
-#	}
-
-           # No match was found. Return null.
-           return(None)
+        # No match was found. Return null.
+        return(None)
 
 
 
 if (__name__ =='__main__') :
     dif = XMLIncomingDIF()
-    
+    dif.readXMLFile("networkSample.xml")
+    name = dif.getObjectClassName("vacuumNetwork")
+    print("Name: {0}".format(name))
