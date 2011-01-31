@@ -60,7 +60,9 @@
 # 
 # 
 
+from xml.dom.minidom import Document
 from XMLIncomingDIF import XMLIncomingDIF
+from XMLParser import XMLParser
 
 
 class XMLMessageNetwork (XMLIncomingDIF) :
@@ -104,12 +106,31 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         #
 
 	self.cleanUpDocument()
-	#doc = xmlNewDoc(BAD_CAST "1.0");
-	#root_node = xmlNewNode(NULL, BAD_CAST "objectModel");
-	#xmlDocSetRootElement(doc, root_node);
-	#xmlNewProp(root_node, BAD_CAST "xmlns", BAD_CAST "http://standards.ieee.org/IEEE1516-2010");
-	#xmlNewProp(root_node, BAD_CAST "xmlns:xsi", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
-	#xmlNewProp(root_node, BAD_CAST "xsi:schemaLocation", BAD_CAST "http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd");
+        self.doc = Document()
+	self.root_node = self.doc.createElement("objectModel");
+        self.doc.appendChild(self.root_node)
+
+        self.root_node.setAttribute("xmlns","http://standards.ieee.org/IEEE1516-2010")
+        self.root_node.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance")
+        self.root_node.setAttribute("xsi:schemaLocation","http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd")
+
+        self.createObjectClass()
+
+
+    def createObjectClass(self) :
+        # Creates the node that contains the object class definition
+        # and all of its children.
+        node = self.doc.createElement("objects")
+        self.root_node.appendChild(node)
+
+        self.objectClassNode = self.doc.createElement("objectClass")
+        node.appendChild(self.objectClassNode)
+
+        nameNode = self.doc.createElement("name")
+        nameNode.appendChild(self.doc.createTextNode("vacuumNetwork"))
+        self.objectClassNode.appendChild(nameNode)
+
+        self.createDimensions()
 
 
     def createDimensions(self):
@@ -117,16 +138,13 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         # objectClass node as a child of the dimensions node. Finally
         # a "name" node is added as a child of the dimensions node.
 
-	#
-	# xmlNewChild() creates a new node, which is "attached" as child node
-	# of root_node node.
-        #
+        self.dimensionsNode = self.doc.createElement("dimensions")
+        self.objectClassNode.appendChild(self.dimensionsNode)
+        self.setNetworkIDNode()
+        self.setProbSuccessNode()
+        
+        
 
-	#node = xmlNewChild(root_node, NULL, BAD_CAST "objects",NULL);
-	#objectClassNode = xmlNewChild(node,NULL,BAD_CAST "objectClass",NULL);
-	#xmlNewChild(objectClassNode,NULL,BAD_CAST "name",BAD_CAST "vacuumNetwork");
-	#dimensionsNode = xmlNewChild(objectClassNode, NULL, BAD_CAST "dimensions",NULL);
-        pass
 
     def setNetworkIDNode(self) :
         # Method to set the value of the id for this vacuum. It
@@ -134,27 +152,37 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         # with. The value is then added to the xml tree under the
         # dimensions node.
 
+        self.networkIDNode = self.doc.createElement("dimension")
+        self.dimensionsNode.appendChild(self.networkIDNode)
 
-	#char numberRef[8];
-	#networkIDNode = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
-	#sprintf(numberRef, "%d", networkID);
-	#xmlNewChild(networkIDNode, NULL, BAD_CAST "name",BAD_CAST "networkID");
-	#xmlNewChild(networkIDNode, NULL, BAD_CAST "value",BAD_CAST numberRef);
-        pass
+        dimension = self.doc.createElement("name")
+        node = self.doc.createTextNode("networkID")
+        dimension.appendChild(node)
+        self.networkIDNode.appendChild(dimension)
+
+        dimension = self.doc.createElement("value")
+        node = self.doc.createTextNode(str(self.getNetworkID()))
+        dimension.appendChild(node)
+        self.networkIDNode.appendChild(dimension)
 
 
 
     def setProbSuccessNode(self) :
-	# Method to set the value of the probability that a message
-	# from the vacuum is successfully received. The value is added
-	# to the xml tree under the dimensions node.
+        # Method to set the value of the prob. of a successful
+        # transmission. 
 
-	#char numberRef[23];
-	#probSuccessNode = xmlNewChild(dimensionsNode, NULL, BAD_CAST "dimension",NULL);
-	#sprintf(numberRef, "%22.14E", probSuccessfulTransmission);
-	#xmlNewChild(probSuccessNode, NULL, BAD_CAST "name",BAD_CAST "probabilitySuccessfulTransmission");
-	#xmlNewChild(probSuccessNode, NULL, BAD_CAST "value",BAD_CAST numberRef);
-        pass
+        self.probSuccessNode = self.doc.createElement("dimension")
+        self.dimensionsNode.appendChild(self.probSuccessNode)
+
+        dimension = self.doc.createElement("name")
+        node = self.doc.createTextNode("probabilitySuccessfulTransmission")
+        dimension.appendChild(node)
+        self.probSuccessNode.appendChild(dimension)
+
+        dimension = self.doc.createElement("value")
+        node = self.doc.createTextNode("{0:22.14E}".format(self.getProbSuccessfulTransmission()))
+        dimension.appendChild(node)
+        self.probSuccessNode.appendChild(dimension)
 
 
 
@@ -162,7 +190,7 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         # Copy the given parsed XML tree into the local tree. Also set
         # the relevant nodes that this class tracks from the tree.
 
-	self.copyXMLTree(existingDocument)
+	#self.copyXMLTree(existingDocument)
 
 	if(self.root_node) :
             self.objectClassNode = self.walkObjectChildrenByNameContents(self.root_node,"objectClass","name","vacuumNetwork")
@@ -190,3 +218,7 @@ class XMLMessageNetwork (XMLIncomingDIF) :
 
 if (__name__ =='__main__') :
     network = XMLMessageNetwork()
+    network.setNetworkID(3)
+    network.setProbSuccessfulTransmission(0.3)
+    network.createRootNode()
+    print(network.xml2Char())
