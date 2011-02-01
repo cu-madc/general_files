@@ -89,7 +89,7 @@ class XMLMessageNetwork (XMLIncomingDIF) :
 
     def setNetworkID(self,value) :
         self.networkID = value
-
+        self.updateNetworkIDNode()
 
     def getProbSuccessfulTransmission(self) :
         return(self.probSuccessfulTransmission)
@@ -97,7 +97,7 @@ class XMLMessageNetwork (XMLIncomingDIF) :
 
     def setProbSuccessfulTransmission(self,value) :
         self.probSuccessfulTransmission = value
-
+        self.updateProbTransmission()
 
 
     def createRootNode(self) :
@@ -164,6 +164,45 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         node = self.doc.createTextNode(str(self.getNetworkID()))
         dimension.appendChild(node)
         self.networkIDNode.appendChild(dimension)
+
+
+
+    def updateNetworkIDNode(self) :
+        # Method to change the network ID node to reflect the current
+        # value of the network id.
+        self.updateValue("networkID",self.getNetworkID())
+
+
+    def updateProbTransmission(self) :
+        # Method to change the network ID node to reflect the current
+        # value of the network id.
+        self.updateValue("probabilitySuccessfulTransmission",
+                         self.getProbSuccessfulTransmission())
+
+
+    def updateValue(self,valueName,newValue) :
+        # Method to change the network ID node to reflect the current
+        # value of the network id.
+
+        if(self.dimensionsNode) :
+            nodes = self.dimensionsNode.getElementsByTagName("dimension")
+            if(nodes.length>0) :
+
+                for dimension in nodes :
+                    # Get the value of the network ID in the tree and set
+                    # it for this instance
+                    networks = dimension.getElementsByTagName("name");
+                    for network in networks:
+                        for detail in network.childNodes:
+                            if((detail.nodeType == Document.TEXT_NODE) and
+                               (detail.nodeValue == valueName)) :
+                                    # This dimension node is for the network id
+                                    values = dimension.getElementsByTagName("value");
+                                    for value in values:
+                                        for id in value.childNodes:
+                                            if(id.nodeType == Document.TEXT_NODE) :
+                                                id.nodeValue = newValue
+
 
 
 
@@ -254,5 +293,9 @@ if (__name__ =='__main__') :
     print(network.xml2Char())
 
 
-    root_node = network.root_node.cloneNode(True)
-    network.copyXMLTree(root_node)
+    network.setNetworkID(1)
+    network.setProbSuccessfulTransmission(0.22)
+    print(network.xml2Char())
+
+    #root_node = network.root_node.cloneNode(True)
+    #network.copyXMLTree(root_node)
