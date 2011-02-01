@@ -191,26 +191,56 @@ class XMLMessageNetwork (XMLIncomingDIF) :
         # the relevant nodes that this class tracks from the tree.
 
 	#self.copyXMLTree(existingDocument)
+        self.root_node = existingDocument.cloneNode(True)
+
+        #print("{0} {1} {2} {3} {4} {5} {6} {7} {8}".format(Document.ELEMENT_NODE, Document.ATTRIBUTE_NODE, Document.TEXT_NODE, Document.CDATA_SECTION_NODE, Document.ENTITY_NODE, Document.PROCESSING_INSTRUCTION_NODE, Document.COMMENT_NODE, Document.DOCUMENT_NODE, Document.DOCUMENT_TYPE_NODE, Document.NOTATION_NODE))
 
 	if(self.root_node) :
-            self.objectClassNode = self.walkObjectChildrenByNameContents(self.root_node,"objectClass","name","vacuumNetwork")
-            self.networkIDNode   = self.walkObjectChildrenByNameContents(self.root_node,"dimension","name","networkID");
-            if(self.networkIDNode) :
-                # Get the value of the network ID in the tree and set
-                # it for this instance
-                node = self.getChildWithName(self.networkIDNode,"value")
-                if(node) :
-                    print("Found ID Node: {0}".format(node[2]))
-                self.setNetworkID(int(node))
+            nodes = self.root_node.getElementsByTagName("objectClass")
+            if(nodes.length==1) :
+                self.objectClassNode = nodes.item(0)
 
-		self.probSuccessNode = self.walkObjectChildrenByNameContents(self.root_node,"dimension","name","probabilitySuccessfulTransmission")
-		if(self.probSuccessNode) :
-			# Get the value of the prob. in the tree and
-			# set it for this instance.
-			node = self.getChildWithName(self.probSuccessNode,"value")
-			if(node) :
-                            print("Found prob Node: {0}".format(node[2]))
-                            self.setProbSuccessfulTransmission(float(node[2]))
+                nodes = self.root_node.getElementsByTagName("dimensions")
+                if(nodes.length==1) :
+                    self.dimensionsNode = nodes.item(0)
+
+                    # Get the value of the network ID in the tree and set
+                    # it for this instance
+                    nodes = self.dimensionsNode.getElementsByTagName("dimension");
+                    for node in nodes:
+
+                        name = None
+                        value = None
+                        for detail in node.childNodes:
+                            for child in detail.childNodes:
+                                if(child.nodeType == Document.TEXT_NODE) :
+                                    
+                                    if(detail.localName == "name") :
+                                        name = child.nodeValue
+
+                                    elif(detail.localName == "value") :
+                                        value = child.nodeValue
+
+                        #print("  Name: {0} Value: {1}".format(name,value))
+                                
+                        if(name == "networkID") :
+                            self.setNetworkID(int(value))
+                            
+                        elif(name == "probabilitySuccessfulTransmission") :
+                            self.setProbSuccessfulTransmission(float(value))
+
+                    #print("network: {0} - prob: {1}".format(
+                    #    self.getNetworkID(),self.getProbSuccessfulTransmission()))
+                        
+
+            else :
+                # Error - there is more than one object class node.
+                if(self.DEBUG) :
+                    print("Error - too many object class nodes.")
+                self.objectClassNode = None
+
+
+                
 
 
 
@@ -222,3 +252,7 @@ if (__name__ =='__main__') :
     network.setProbSuccessfulTransmission(0.3)
     network.createRootNode()
     print(network.xml2Char())
+
+
+    root_node = network.root_node.cloneNode(True)
+    network.copyXMLTree(root_node)
