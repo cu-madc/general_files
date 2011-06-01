@@ -74,6 +74,10 @@ class XMLParser (xml.sax.handler.ContentHandler):
 
 
 
+    # Constants used to determine what kind of message was
+    # passed. This number is assigned based on the contents of the
+    # message and help the base object decide what variables should be
+    # parsed from the message that is passed.
     EMPTY, CHECK_INCOMING, VACUUM_NETWORK, \
 	   VACUUM_STATE, CONTROLER_NETWORK = range(5)
 	
